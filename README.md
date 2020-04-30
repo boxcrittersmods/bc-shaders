@@ -13,6 +13,9 @@ in vec2 vPixelCoord;
 out vec4 fColor;
 
 uniform sampler2D uStageTex;
+uniform float uTime;
+uniform vec2 uViewportSize;
+uniform vec2 vMousePos;
 
 void main() {
 	fColor = texture(uStageTex,vPixelCoord);
@@ -27,3 +30,9 @@ loadShader({fs:fs})
 * data:custom uniforms
 * container:
 }
+
+# Built in uniforms
+sampler2D uStageTex
+float uTime
+vec2 uViewportSize
+vec2 vMousePos

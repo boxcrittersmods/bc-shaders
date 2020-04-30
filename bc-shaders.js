@@ -99,7 +99,7 @@
 			var location = gl.getUniformLocation(shader,key);
 			if(location==-1)continue;
 			if(Array.isArray(value)) {
-				if(value.length<5&&value.length>0) {gl["uniform"+value.length+"f"](location,value)}
+				if(value.length<5&&value.length>0) {gl["uniform"+value.length+"fv"](location,value)}
 			} else {
 				gl.uniform1f(location,value);
 			}
@@ -108,18 +108,19 @@
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 		gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
-
+	var GLSLFilter =(() {
 	function GLSLFilter({vs,fs,data={}}) {
 		console.log("GLSLFilter");
 		let gl = GLSLFilter.gl;
 		let vertexShader = createShader(gl, gl.VERTEX_SHADER, vs);
 		let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER,fs);
 		let program = createProgram(gl, vertexShader, fragmentShader);
+		if(!program) return;
 		let quad = createScreenQuad(gl);
 		let texture = createTexture(gl);
 
 		data.uTime = performance.now();
-		delete data.uStageTexLoc
+		delete data.uStageTex;
 		this.data = data;
 
 		this.shader = program;
@@ -136,14 +137,6 @@
 	p.getBounds = function () {
 		return new createjs.Rectangle(0, 0, 0, 0);
 	};
-	/*
-	attributes
-	aPos
-	varying
-	vPixelCoord
-	uniforms
-	uTime
-	*/
 	p.applyFilter = function (
 		context,
 		x,
@@ -171,6 +164,8 @@
 		//gl.generateMipmap(gl.TEXTURE_2D);
 		gl.bindTexture(gl.TEXTURE_2D, null);
 
+		this.data.uViewportSize = [width,height];
+
 		gl.canvas.width = width;
 		gl.canvas.height = height;
 		gl.viewport(0, 0, width, height);
@@ -190,9 +185,8 @@
 		return "[GLSLFilter]";
 	};
 
-	createjs.GLSLFilter = createjs.promote(GLSLFilter, "Filter");
-}
-{
+	return createjs.promote(GLSLFilter, "Filter");
+	})();
 	let stage = world.stage;
 	let canvas = stage.canvas;
 	
@@ -202,32 +196,33 @@
 	});
 
 	window.loadShader = function ({vs, fs,container,data}) {
-		let filter = new createjs.GLSLFilter({vs,fs,data});
-
+		let filter = new GLSLFilter({vs,fs,data});
+		container.stage.on("stagemousemove",function(e) {
+			filter.data.uMousePos = [e.rawX,e.rawY]
+		})
 		container.filters = container.filters || [];
 		container.filters.push(filter);
 
 		console.dir(filter);
-		//world.stage.children[0].filters = [filter];
-
-	
+		//world.stage.children[0].filters = [filter];	
 	}
 	window.clearShaders = function (container) {
 		container.filters = [];
 	}
 }
-clearShaders(world.stage)
+/*clearShaders(world.stage)
 loadShader({
 	vs: `#version 300 es
-	in vec4 aPos;
-	in vec2 aTexCoord;
-	
-	out vec2 vPixelCoord;
-	
-	void main(){
-		vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
-		gl_Position = aPos;
-	}`,
+in vec4 aPos;
+in vec2 aTexCoord;
+
+out vec2 vPixelCoord;
+uniform float uTime;
+
+void main(){
+	vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
+	gl_Position = aPos+uTime;
+}`,
 	fs:`#version 300 es
 	precision mediump float;
 	
@@ -235,12 +230,11 @@ loadShader({
 	out vec4 fColor;
 	
 	uniform sampler2D uStageTex;
-	uniform float uTime;
 	
 	void main() {
-	fColor = texture(uStageTex,vPixelCoord)*vec4(1,.5,2,1);
+	fColor = texture(uStageTex,vPixelCoord);
 	}`,
 	data:{
 	},
 	container:world.stage
-});
+});*/
