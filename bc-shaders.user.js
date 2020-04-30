@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.1
+// @version      0.3
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer
 // @match        https://boxcritters.com/play/index.html
