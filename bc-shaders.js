@@ -141,6 +141,7 @@
 	varying
 	vPixelCoord
 	uniforms
+	uTime
 	*/
 	p.applyFilter = function (
 		context,
@@ -203,12 +204,6 @@
 		stage,
 		stage.children[0]
 	]
-	let shaders = [
-
-	]
-	filterContainers.forEach(fc=>{
-		fc.filters = shaders;
-	});
 
 	let vertexShaderSource = `#version 300 es
 in vec4 aPos;
@@ -221,11 +216,11 @@ void main(){
 	gl_Position = aPos;
 }`;
 
-	window.loadShader = function ({vs = vertexShaderSource, fs,data={}}) {
+	window.loadShader = function ({vs = vertexShaderSource, fs,data={}},container=world.stage) {
 		delete stage.filters[0];
 		let filter = new createjs.GLSLFilter({vs,fs,data});
 
-		shaders.push(filter)
+		container.filters.push(filter)
 
 		console.dir(filter);
 		//world.stage.children[0].filters = [filter];
