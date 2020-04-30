@@ -5,6 +5,7 @@
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer
 // @match        https://boxcritters.com/play/index.html
+// @grant       none
 // ==/UserScript==
 
 (function() {
@@ -232,7 +233,7 @@ window.addEventListener('load', function() {
 		container:world.stage
 	}
 
-	window.loadShader = function ({vs, fs,container,uniforms}) {
+	unsafeWindow.loadShader = function ({vs, fs,container,uniforms}) {
 		vs = vs||DEFAULT_SHADER.vs;
 		fs = fs||DEFAULT_SHADER.fs;
 		container = container||DEFAULT_SHADER.container;
@@ -247,7 +248,7 @@ window.addEventListener('load', function() {
 		console.dir(filter);
 		//world.stage.children[0].filters = [filter];	
 	}
-	window.clearShaders = function (container=DEFAULT_SHADER.container) {
+	unsafeWindow.clearShaders = function (container=DEFAULT_SHADER.container) {
 		container.filters = [];
 	}
 },false);
