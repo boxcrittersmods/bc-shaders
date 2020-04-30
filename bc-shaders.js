@@ -200,11 +200,6 @@
 		stage.updateCache();
 	});
 
-	let filterContainers = [
-		stage,
-		stage.children[0]
-	]
-
 	let vertexShaderSource = `#version 300 es
 in vec4 aPos;
 in vec2 aTexCoord;
@@ -217,13 +212,15 @@ void main(){
 }`;
 
 	window.loadShader = function ({vs = vertexShaderSource, fs,data={}},container=world.stage) {
-		delete stage.filters[0];
 		let filter = new createjs.GLSLFilter({vs,fs,data});
 
 		container.filters.push(filter)
 
 		console.dir(filter);
 		//world.stage.children[0].filters = [filter];
+	}
+	window.clearShaders = function (container=world.stage) {
+		container.filters = [];
 	}
 }
 
