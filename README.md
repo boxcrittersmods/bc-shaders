@@ -25,4 +25,5 @@ loadShader({fs:fs})
 * fs:FragmentShader
 * vs:VertexShader
 * data:custom uniforms
+* container:
 }

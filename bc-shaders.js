@@ -128,6 +128,7 @@
 
 		this.VTX_SHADER_BODY = vs;
 		this.FRAG_SHADER_BODY = fs;
+		this.usesContext = true;
 	}
 	GLSLFilter.gl = createContext(window.innerWidth, window.innerHeight);
 	let p = createjs.extend(GLSLFilter, createjs.Filter);
@@ -194,34 +195,52 @@
 {
 	let stage = world.stage;
 	let canvas = stage.canvas;
+	
 	stage.cache(0, 0, canvas.width, canvas.height);
-
 	createjs.Ticker.on("tick", function (t) {
 		stage.updateCache();
 	});
 
-	let vertexShaderSource = `#version 300 es
-in vec4 aPos;
-in vec2 aTexCoord;
-
-out vec2 vPixelCoord;
-
-void main(){
-	vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
-	gl_Position = aPos;
-}`;
-
-	window.loadShader = function ({vs = vertexShaderSource, fs,data={}},container=world.stage) {
+	window.loadShader = function ({vs, fs,container,data}) {
 		let filter = new createjs.GLSLFilter({vs,fs,data});
 
-		container.filters = container.filters ||[]
-		container.filters.push(filter)
+		container.filters = container.filters || [];
+		container.filters.push(filter);
 
 		console.dir(filter);
 		//world.stage.children[0].filters = [filter];
+
+	
 	}
-	window.clearShaders = function (container=world.stage) {
+	window.clearShaders = function (container) {
 		container.filters = [];
 	}
 }
-
+clearShaders(world.stage)
+loadShader({
+	vs: `#version 300 es
+	in vec4 aPos;
+	in vec2 aTexCoord;
+	
+	out vec2 vPixelCoord;
+	
+	void main(){
+		vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
+		gl_Position = aPos;
+	}`,
+	fs:`#version 300 es
+	precision mediump float;
+	
+	in vec2 vPixelCoord;
+	out vec4 fColor;
+	
+	uniform sampler2D uStageTex;
+	uniform float uTime;
+	
+	void main() {
+	fColor = texture(uStageTex,vPixelCoord)*vec4(1,.5,2,1);
+	}`,
+	data:{
+	},
+	container:world.stage
+});
