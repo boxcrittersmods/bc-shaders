@@ -98,7 +98,7 @@
 			var value = data[key];
 			var location = gl.getUniformLocation(shader,key);
 			if(Array.isArray(data[value])) {
-				if(value.length<5&&value.length>0) {gl.["uniform"+value.length+"f"](location,value)}
+				if(value.length<5&&value.length>0) {gl["uniform"+value.length+"f"](location,value)}
 			} else {
 				gl.uniform1f(location,value);
 			}
@@ -230,3 +230,4 @@ void main(){
 		//world.stage.children[0].filters = [filter];
 	}
 }
+
