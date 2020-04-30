@@ -120,7 +120,7 @@
 
 		data.uTime = performance.now();
 		delete data.uStageTexLoc
-		this.data;
+		this.data = data;
 
 		this.shader = program;
 		this.mesh = quad;
@@ -176,7 +176,7 @@
 		gl.clearColor(0, 0, 0, 1);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
-		render(gl, this.mesh, this.shader, this.texture);
+		render(gl, this.mesh, this.shader, this.texture,this.data);
 
 		targetContext.setTransform(1, 0, 0, 1, 0, 0);
 		targetContext.clearRect(0, 0, width, height);
