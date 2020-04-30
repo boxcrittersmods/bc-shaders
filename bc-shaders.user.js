@@ -5,7 +5,6 @@
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer
 // @match        https://boxcritters.com/play/index.html
-// @grant       none
 // ==/UserScript==
 
 (function() {
