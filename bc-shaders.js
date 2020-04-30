@@ -214,6 +214,7 @@ void main(){
 	window.loadShader = function ({vs = vertexShaderSource, fs,data={}},container=world.stage) {
 		let filter = new createjs.GLSLFilter({vs,fs,data});
 
+		container.filters = container.filters ||[]
 		container.filters.push(filter)
 
 		console.dir(filter);
