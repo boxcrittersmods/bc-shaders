@@ -13,6 +13,7 @@ console.info("-----------------------------------");
 console.info("[BOX CRITTERS SHADER LOADER]");
 console.info("A mod created by\nTumbleGamer");
 console.info("-----------------------------------");
+window.addEventListener('load', function() {
     function createContext(width, height) {
 		let canvas = document.createElement("canvas");
 		canvas.width = width;
@@ -249,4 +250,5 @@ console.info("-----------------------------------");
 	window.clearShaders = function (container=DEFAULT_SHADER.container) {
 		container.filters = [];
 	}
+},false);
 })();
