@@ -76,7 +76,7 @@
 		return texture;
 	}
 
-	function render(gl, mesh, shader, texture,data) {
+	function render(gl, mesh, shader, texture,data={}) {
 		gl.useProgram(shader);
 
 		let aPosLoc = gl.getAttribLocation(shader, "aPos");
@@ -109,7 +109,7 @@
 		gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
 
-	function GLSLFilter({vs,fs,data}) {
+	function GLSLFilter({vs,fs,data={}}) {
 		console.log("GLSLFilter");
 		let gl = GLSLFilter.gl;
 		let vertexShader = createShader(gl, gl.VERTEX_SHADER, vs);
@@ -221,7 +221,7 @@ void main(){
 	gl_Position = aPos;
 }`;
 
-	window.loadShader = function ({vs = vertexShaderSource, fs,data}) {
+	window.loadShader = function ({vs = vertexShaderSource, fs,data={}) {
 		delete stage.filters[0];
 		let filter = new createjs.GLSLFilter({vs,fs,data});
 
