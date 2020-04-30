@@ -76,7 +76,7 @@
 		return texture;
 	}
 
-	function render(gl, mesh, shader, texture) {
+	function render(gl, mesh, shader, texture,data) {
 		gl.useProgram(shader);
 
 		let aPosLoc = gl.getAttribLocation(shader, "aPos");
@@ -93,6 +93,16 @@
 		gl.activeTexture(gl.TEXTURE0);
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.uniform1i(uStageTexLoc, 0);
+
+		for(var key in data) {
+			var value = data[key];
+			var location = gl.getUniformLocation(shader,key);
+			if(Array.isArray(data[value])) {
+				if(value.length<5&&value.length>0) {gl.["uniform"+value.length+"f"](location,value)}
+			} else {
+				gl.uniform1f(location,value);
+			}
+		}
 
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 		gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
