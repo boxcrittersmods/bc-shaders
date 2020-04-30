@@ -7,7 +7,7 @@ install https://boxcrittersmods.ga/tools/
 install https://github.com/boxcritters/bc-shaders/raw/master/bc-shaders.user.js
 # Sample Usage
 ```js
-var fs = `#version 300 es
+loadShader({fs: `#version 300 es
 precision mediump float;
 
 in vec2 vPixelCoord;
@@ -20,8 +20,7 @@ uniform vec2 vMousePos;
 
 void main() {
 	fColor = texture(uStageTex,vPixelCoord);
-}`
-loadShader({fs:fs})
+}`})
 ```
 
 # params
