@@ -3,7 +3,8 @@
 *Based off: [https://github.com/baseten/easelbender]*
 
 # Steps for now
-Copy https://github.com/boxcritters/bc-shaders/blob/master/bc-shaders.js in to console
+install https://boxcrittersmods.ga/tools/
+install https://github.com/boxcritters/bc-shaders/raw/master/bc-shaders.user.js
 # Sample Usage
 ```js
 var fs = `#version 300 es
