@@ -97,6 +97,7 @@
 		for(var key in data) {
 			var value = data[key];
 			var location = gl.getUniformLocation(shader,key);
+			if(location==-1)continue;
 			if(Array.isArray(data[value])) {
 				if(value.length<5&&value.length>0) {gl["uniform"+value.length+"f"](location,value)}
 			} else {
