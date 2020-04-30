@@ -225,7 +225,7 @@ void main(){
 		delete stage.filters[0];
 		let filter = new createjs.GLSLFilter({vs,fs,data});
 
-		this.shaders.push(filter)
+		shaders.push(filter)
 
 		console.dir(filter);
 		//world.stage.children[0].filters = [filter];
