@@ -209,7 +209,7 @@ unsafeWindow.addEventListener('load', function() {
 	});
 
 	var DEFAULT_SHADER = {
-		vs:`version 300 es
+		vs:`#version 300 es
 		in vec4 aPos;
 		in vec2 aTexCoord;
 		
@@ -232,7 +232,7 @@ unsafeWindow.addEventListener('load', function() {
 		container:world.stage
 	}
 
-	unsafeWindow.loadShader = function ({vs, fs,container,uniforms}) {
+	unsafeWindow.loadShader = function ({vs, fs,container,uniforms}={}) {
 		vs = vs||DEFAULT_SHADER.vs;
 		fs = fs||DEFAULT_SHADER.fs;
 		container = container||DEFAULT_SHADER.container;
