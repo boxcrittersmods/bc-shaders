@@ -126,8 +126,8 @@
 		this.mesh = quad;
 		this.texture = texture;
 
-		this.VTX_SHADER_BODY = vertexShaderSource;
-		this.FRAG_SHADER_BODY = fragmentShaderSource;
+		this.VTX_SHADER_BODY = vs;
+		this.FRAG_SHADER_BODY = fs;
 	}
 	GLSLFilter.gl = createContext(window.innerWidth, window.innerHeight);
 	let p = createjs.extend(GLSLFilter, createjs.Filter);
