@@ -230,20 +230,3 @@ void main(){
 		//world.stage.children[0].filters = [filter];
 	}
 }
-
-
-
-
-	let fragmentShaderSource = `#version 300 es
-precision mediump float;
-
-in vec2 vPixelCoord;
-out vec4 fColor;
-
-uniform sampler2D uStageTex;
-
-void main() {
-	fColor = texture(uStageTex,vPixelCoord)* texture(uStageTex,vPixelCoord);
-}`;
-
-loadShader({fs:fragmentShaderSource})
