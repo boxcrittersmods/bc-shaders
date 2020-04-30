@@ -14,7 +14,7 @@ console.info("-----------------------------------");
 console.info("[BOX CRITTERS SHADER LOADER]");
 console.info("A mod created by\nTumbleGamer");
 console.info("-----------------------------------");
-window.addEventListener('load', function() {
+unsafeWindow.addEventListener('load', function() {
     function createContext(width, height) {
 		let canvas = document.createElement("canvas");
 		canvas.width = width;
@@ -147,7 +147,7 @@ window.addEventListener('load', function() {
 		this.FRAG_SHADER_BODY = fs;
 		this.usesContext = true;
 	}
-	GLSLFilter.gl = createContext(window.innerWidth, window.innerHeight);
+	GLSLFilter.gl = createContext(unsafeWindow.innerWidth, unsafeWindow.innerHeight);
 	let p = createjs.extend(GLSLFilter, createjs.Filter);
 
 	p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
