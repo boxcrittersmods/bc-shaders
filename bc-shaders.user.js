@@ -9,7 +9,6 @@
 
 (function() {
 	'use strict';
-	if(!world||!createjs) return;
 console.info("-----------------------------------");
 console.info("[BOX CRITTERS SHADER LOADER]");
 console.info("A mod created by\nTumbleGamer");
