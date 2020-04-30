@@ -117,11 +117,14 @@
 		let quad = createScreenQuad(gl);
 		let texture = createTexture(gl);
 
+		data.uTime = performance.now();
+		delete data.uStageTexLoc
+		this.data;
+
 		this.shader = program;
 		this.mesh = quad;
 		this.texture = texture;
-		delete data.uStageTexLoc
-		this.data;
+
 		this.VTX_SHADER_BODY = vertexShaderSource;
 		this.FRAG_SHADER_BODY = fragmentShaderSource;
 	}
