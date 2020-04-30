@@ -9,7 +9,11 @@
 
 (function() {
 	'use strict';
-    if(!world||!createjs) return;
+	if(!world||!createjs) return;
+console.info("-----------------------------------");
+console.info("[BOX CRITTERS SHADER LOADER]");
+console.info("A mod created by\nTumbleGamer");
+console.info("-----------------------------------");
     function createContext(width, height) {
 		let canvas = document.createElement("canvas");
 		canvas.width = width;
