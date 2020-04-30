@@ -1,6 +1,9 @@
 # Hello World
 
 *Based off: [https://github.com/baseten/easelbender]*
+
+# Steps for now
+Copy https://github.com/boxcritters/bc-shaders/blob/master/bc-shaders.js in to console
 # Sample Usage
 ```js
 var fs = `#version 300 es
