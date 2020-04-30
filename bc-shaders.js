@@ -76,7 +76,7 @@
 		return texture;
 	}
 
-	function render(gl, mesh, shader, texture,data={}}) {
+	function render(gl, mesh, shader, texture,data={}) {
 		gl.useProgram(shader);
 
 		let aPosLoc = gl.getAttribLocation(shader, "aPos");
