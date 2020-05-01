@@ -20,7 +20,7 @@ unsafeWindow.addEventListener('load', function() {
 		canvas.height = height;
 		//document.body.appendChild(canvas);
 
-		let gl = canvas.getContext("webgl2");
+		let gl = canvas.getContext("webgl2")|| canvas.getContext("webgl");
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 		return gl;
