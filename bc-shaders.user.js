@@ -124,10 +124,10 @@ unsafeWindow.addEventListener('load', function() {
 		gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
 	var GLSLFilter =(()=> {
-	function GLSLFilter({vs,fs,data={}}) {
+	function GLSLFilter({fs,data={}}) {
 		console.log("GLSLFilter");
 		let gl = GLSLFilter.gl;
-		let vertexShader = createShader(gl, gl.VERTEX_SHADER, vs);
+		let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.vs);
 		let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER,fs);
 		let program = createProgram(gl, vertexShader, fragmentShader);
 		if(!program) return;
@@ -146,6 +146,29 @@ unsafeWindow.addEventListener('load', function() {
 		this.usesContext = true;
 	}
 	GLSLFilter.gl = createContext(unsafeWindow.innerWidth, unsafeWindow.innerHeight);
+	GLSLFilter.vs = `#version 300 es
+	in vec4 aPos;
+	in vec2 aTexCoord;
+	
+	out vec2 vPixelCoord;
+	
+	void main(){
+		vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
+		gl_Position = aPos;
+	}`;
+	GLSLFilter.DEFAULT_SHADER = {
+		fs:`#version 300 es
+		precision mediump float;
+		
+		in vec2 vPixelCoord;
+		out vec4 fColor;
+		
+		void main() {
+			fColor = texture(uStageTex,vPixelCoord);
+		}`,
+		uniforms:{},
+		container:world.stage
+	}
 	let p = createjs.extend(GLSLFilter, createjs.Filter);
 
 	p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
@@ -209,35 +232,10 @@ unsafeWindow.addEventListener('load', function() {
 		stage.updateCache();
 	});
 
-	var DEFAULT_SHADER = {
-		vs:`#version 300 es
-		in vec4 aPos;
-		in vec2 aTexCoord;
-		
-		out vec2 vPixelCoord;
-		
-		void main(){
-			vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
-			gl_Position = aPos;
-		}`,
-		fs:`#version 300 es
-		precision mediump float;
-		
-		in vec2 vPixelCoord;
-		out vec4 fColor;
-		
-		void main() {
-			fColor = texture(uStageTex,vPixelCoord);
-		}`,
-		uniforms:{},
-		container:world.stage
-	}
-
-	unsafeWindow.loadShader = function ({vs, fs,container,uniforms}={}) {
-		vs = vs||DEFAULT_SHADER.vs;
+	unsafeWindow.loadShader = function ({fs,container,uniforms}={}) {
 		fs = fs||DEFAULT_SHADER.fs;
-		container = container||DEFAULT_SHADER.container;
-		uniforms=uniforms||DEFAULT_SHADER.uniforms
+		container = container||GLSLFilter.DEFAULT_SHADER.container;
+		uniforms=uniforms||GLSLFilter.DEFAULT_SHADER.uniforms
 		let filter = new GLSLFilter({vs,fs,data: uniforms});
 		container.stage.on("stagemousemove",function(e) {
 			filter.data.uMousePos = [e.rawX,e.rawY]
