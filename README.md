@@ -35,4 +35,5 @@ void main() {
 sampler2D uStageTex
 float uTime
 vec2 uViewportSize
-vec2 vMousePos
+vec2 uMousePos
+float uRandom

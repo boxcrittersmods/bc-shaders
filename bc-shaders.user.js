@@ -178,6 +178,7 @@ unsafeWindow.addEventListener('load', function() {
 		gl.bindTexture(gl.TEXTURE_2D, null);
 
 		this.data.uViewportSize = [width,height];
+		this.data.uRandom = Math.random();
 
 		gl.canvas.width = width;
 		gl.canvas.height = height;
