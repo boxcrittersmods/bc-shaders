@@ -134,7 +134,6 @@ unsafeWindow.addEventListener('load', function() {
 		let quad = createScreenQuad(gl);
 		let texture = createTexture(gl);
 
-		data.uTime = performance.now();
 		delete data.uStageTex;
 		this.data = data;
 
@@ -179,6 +178,7 @@ unsafeWindow.addEventListener('load', function() {
 
 		this.data.uViewportSize = [width,height];
 		this.data.uRandom = Math.random();
+		this.data.uTime = performance.now();
 
 		gl.canvas.width = width;
 		gl.canvas.height = height;
