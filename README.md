@@ -16,7 +16,7 @@ out vec4 fColor;
 uniform sampler2D uStageTex;
 uniform float uTime;
 uniform vec2 uViewportSize;
-uniform vec2 vMousePos;
+uniform vec2 uMousePos;
 
 void main() {
 	fColor = texture(uStageTex,vPixelCoord);
