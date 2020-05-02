@@ -124,11 +124,11 @@ unsafeWindow.addEventListener('load', function() {
 		gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
 	var GLSLFilter =(()=> {
-	function GLSLFilter({fs,data={}}) {
+	function GLSLFilter({shader,data={}}) {
 		console.log("GLSLFilter");
 		let gl = GLSLFilter.gl;
-		let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.vs);
-		let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER,fs);
+		let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER);
+		let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER,shader);
 		let program = createProgram(gl, vertexShader, fragmentShader);
 		if(!program) return;
 		let quad = createScreenQuad(gl);
@@ -141,12 +141,11 @@ unsafeWindow.addEventListener('load', function() {
 		this.mesh = quad;
 		this.texture = texture;
 
-		this.VTX_SHADER_BODY = vs;
-		this.FRAG_SHADER_BODY = fs;
+		this.SHADER_BODY = shader;
 		this.usesContext = true;
 	}
 	GLSLFilter.gl = createContext(unsafeWindow.innerWidth, unsafeWindow.innerHeight);
-	GLSLFilter.vs = `#version 300 es
+	GLSLFilter.VERTEX_SHADER = `#version 300 es
 	in vec4 aPos;
 	in vec2 aTexCoord;
 	
@@ -232,11 +231,11 @@ unsafeWindow.addEventListener('load', function() {
 		stage.updateCache();
 	});
 
-	unsafeWindow.loadShader = function ({fs,container,uniforms}={}) {
-		fs = fs||DEFAULT_SHADER.fs;
+	unsafeWindow.loadShader = function ({fsshader,container,uniforms}={}) {
+		shader = shader||fs||DEFAULT_SHADER.fs;
 		container = container||GLSLFilter.DEFAULT_SHADER.container;
 		uniforms=uniforms||GLSLFilter.DEFAULT_SHADER.uniforms
-		let filter = new GLSLFilter({vs,fs,data: uniforms});
+		let filter = new GLSLFilter({shader,data: uniforms});
 		container.stage.on("stagemousemove",function(e) {
 			filter.data.uMousePos = [e.rawX,e.rawY]
 		})

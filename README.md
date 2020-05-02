@@ -25,8 +25,7 @@ void main() {
 
 # params
 {
-* fs:FragmentShader
-* vs:VertexShader
+* shader:Shader
 * data:custom uniforms
 * container:
 }
