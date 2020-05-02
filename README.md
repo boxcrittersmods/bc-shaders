@@ -32,8 +32,8 @@ void main() {
 }
 
 # Built in uniforms
-sampler2D uStageTex
-float uTime
-vec2 uViewportSize
-vec2 uMousePos
-float uRandom
+* sampler2D uStageTex
+* float uTime
+* vec2 uViewportSize
+* vec2 uMousePos
+* float uRandom
