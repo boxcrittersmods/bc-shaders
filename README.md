@@ -7,7 +7,7 @@
 1. install https://github.com/boxcritters/bc-shaders/raw/master/bc-shaders.user.js
 # Sample Usage
 ```js
-loadShader({fs: `#version 300 es
+loadShader({shader: `#version 300 es
 precision mediump float;
 
 in vec2 vPixelCoord;
