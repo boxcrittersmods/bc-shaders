@@ -232,7 +232,11 @@ unsafeWindow.addEventListener('load', function() {
 	});
 
 	unsafeWindow.loadShader = function ({fs,shader,container,uniforms}={}) {
-		shader = shader||fs||DEFAULT_SHADER.fs;
+		if(fs) {
+			shader = fs;
+			console.warn("fs property will be depreacated. Please from now on call it shader.")
+		}
+		shader = shader||DEFAULT_SHADER.fs;
 		container = container||GLSLFilter.DEFAULT_SHADER.container;
 		uniforms=uniforms||GLSLFilter.DEFAULT_SHADER.uniforms
 		let filter = new GLSLFilter({shader,data: uniforms});
