@@ -249,7 +249,7 @@ unsafeWindow.addEventListener('load', function() {
 		console.dir(filter);
 		return filter;
 	}
-	unsafeWindow.clearShaders = function (container=DEFAULT_SHADER.container) {
+	unsafeWindow.clearShaders = function (container=GLSLFilter.DEFAULT_SHADER.container) {
 		container.filters = [];
 	}
 },false);
