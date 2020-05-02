@@ -243,7 +243,6 @@ unsafeWindow.addEventListener('load', function() {
 		container.filters.push(filter);
 
 		console.dir(filter);
-		//world.stage.children[0].filters = [filter];	
 	}
 	unsafeWindow.clearShaders = function (container=DEFAULT_SHADER.container) {
 		container.filters = [];
