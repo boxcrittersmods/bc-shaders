@@ -231,7 +231,7 @@ unsafeWindow.addEventListener('load', function() {
 		stage.updateCache();
 	});
 
-	unsafeWindow.loadShader = function ({fsshader,container,uniforms}={}) {
+	unsafeWindow.loadShader = function ({fs,shader,container,uniforms}={}) {
 		shader = shader||fs||DEFAULT_SHADER.fs;
 		container = container||GLSLFilter.DEFAULT_SHADER.container;
 		uniforms=uniforms||GLSLFilter.DEFAULT_SHADER.uniforms
