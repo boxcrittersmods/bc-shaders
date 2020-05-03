@@ -226,7 +226,7 @@ unsafeWindow.addEventListener('load', function() {
 	let stage = world.stage;
 	let canvas = stage.canvas;
 	
-	stage.cache(0, 0, canvas.width, canvas.height);
+	stage.cache(world.stage.x, world.stage.y, world.stage.width, world.stage.height);
 	createjs.Ticker.on("tick", function (t) {
 		stage.updateCache();
 	});
