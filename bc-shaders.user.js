@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.51
+// @version      0.52
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/index.html
@@ -31,9 +31,7 @@
 			gl.shaderSource(shader, source)
 			gl.compileShader(shader)
 			let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS)
-			if (success) {
-				return shader
-			}
+			if (success) return shader
 
 			console.log(gl.getShaderInfoLog(shader))
 			gl.deleteShader(shader)
@@ -45,9 +43,7 @@
 			gl.attachShader(program, fragmentShader)
 			gl.linkProgram(program)
 			let success = gl.getProgramParameter(program, gl.LINK_STATUS)
-			if (success) {
-				return program
-			}
+			if (success) return program
 			console.log(gl.getProgramInfoLog(program))
 			gl.deleteProgram(program)
 		}
@@ -145,25 +141,25 @@
 			}
 			GLSLFilter.gl = createContext(unsafeWindow.innerWidth, unsafeWindow.innerHeight)
 			GLSLFilter.VERTEX_SHADER = `#version 300 es
-	in vec4 aPos;
-	in vec2 aTexCoord;
+				in vec4 aPos;
+				in vec2 aTexCoord;
 
-	out vec2 vPixelCoord;
+				out vec2 vPixelCoord;
 
-	void main(){
-		vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
-		gl_Position = aPos;
-	}`
+				void main(){
+					vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
+					gl_Position = aPos;
+				}`
 			GLSLFilter.DEFAULT_SHADER = {
 				shader: `#version 300 es
-		precision mediump float;
+					precision mediump float;
 
-		in vec2 vPixelCoord;
-		out vec4 fColor;
+					in vec2 vPixelCoord;
+					out vec4 fColor;
 
-		void main() {
-			fColor = texture(uStageTex,vPixelCoord);
-		}`,
+					void main() {
+						fColor = texture(uStageTex,vPixelCoord);
+					}`,
 				uniforms: _ => ({}),
 				container: world.stage
 			}
@@ -226,7 +222,7 @@
 		unsafeWindow.loadShader = function ({ fs, shader, container, uniforms } = {}) {
 			if (fs) {
 				shader = fs
-				console.warn('"fs" property is depricated, use "shader".')
+				console.warn('"fs" property is depricated, use "shader"')
 			}
 			if (!shader) throw "No shader!"
 			container || (container = GLSLFilter.DEFAULT_SHADER.container)
