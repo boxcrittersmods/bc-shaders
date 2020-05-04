@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.4
+// @version      0.51
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/index.html
@@ -109,22 +109,22 @@
 			gl.bindTexture(gl.TEXTURE_2D, texture)
 			gl.uniform1i(uStageTexLoc, 0)
 
-			for (var key in data) {
-				var value = data[key]
-				var location = gl.getUniformLocation(shader, key)
+			for (let key in data) {
+				let value = data[key]
+				let location = gl.getUniformLocation(shader, key)
 				if (location == -1) continue
-				if (Array.isArray(value)) {
-					if (value.length < 5 && value.length > 0) { gl["uniform" + value.length + "fv"](location, value) }
-				} else {
-					gl.uniform1f(location, value)
-				}
+
+				if (Array.isArray(value))
+					if (value.length < 5 && value.length > 0) gl[`uniform${value.length}fv`](location, value)
+					else
+						gl.uniform1f(location, value)
 			}
 
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO)
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0)
 		}
 		var GLSLFilter = (() => {
-			function GLSLFilter({ shader, data = {} }) {
+			function GLSLFilter({ shader, data }) {
 				console.log("GLSLFilter")
 				let gl = GLSLFilter.gl
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER)
@@ -134,7 +134,6 @@
 				let quad = createScreenQuad(gl)
 				let texture = createTexture(gl)
 
-				delete data.uStageTex
 				this.data = data
 
 				this.shader = program
@@ -156,7 +155,7 @@
 		gl_Position = aPos;
 	}`
 			GLSLFilter.DEFAULT_SHADER = {
-				fs: `#version 300 es
+				shader: `#version 300 es
 		precision mediump float;
 
 		in vec2 vPixelCoord;
@@ -165,7 +164,7 @@
 		void main() {
 			fColor = texture(uStageTex,vPixelCoord);
 		}`,
-				uniforms: {},
+				uniforms: _ => ({}),
 				container: world.stage
 			}
 			let p = createjs.extend(GLSLFilter, createjs.Filter)
@@ -198,17 +197,17 @@
 				//gl.generateMipmap(gl.TEXTURE_2D);
 				gl.bindTexture(gl.TEXTURE_2D, null)
 
-				this.data.uViewportSize = [width, height]
-				this.data.uRandom = Math.random()
-				this.data.uTime = performance.now()
-
 				gl.canvas.width = width
 				gl.canvas.height = height
 				gl.viewport(0, 0, width, height)
 				gl.clearColor(0, 0, 0, 1)
 				gl.clear(gl.COLOR_BUFFER_BIT)
 
-				render(gl, this.mesh, this.shader, this.texture, this.data)
+				render(gl, this.mesh, this.shader, this.texture, Object.assign({
+					uViewportSize: [width, height],
+					uRandom: Math.random(),
+					uTime: performance.now(),
+				}, this.data()))
 
 				targetContext.setTransform(1, 0, 0, 1, 0, 0)
 				targetContext.clearRect(0, 0, width, height)
@@ -227,9 +226,9 @@
 		unsafeWindow.loadShader = function ({ fs, shader, container, uniforms } = {}) {
 			if (fs) {
 				shader = fs
-				console.warn("fs property will be depreacated. Please from now on call it shader.")
+				console.warn('"fs" property is depricated, use "shader".')
 			}
-			shader || (shader = DEFAULT_SHADER.fs)
+			if (!shader) throw "No shader!"
 			container || (container = GLSLFilter.DEFAULT_SHADER.container)
 			uniforms || (uniforms = GLSLFilter.DEFAULT_SHADER.uniforms)
 			let filter = new GLSLFilter({ shader, data: uniforms })
@@ -237,8 +236,8 @@
 				filter.data.uMousePos = [e.rawX, e.rawY]
 			})
 			if (!container.bitmapCache) {
-				container.cache(container.x, container.y, container.width, container.height)
-				container.cacheTickOff = createjs.Ticker.on("tick", function (t) {container.updateCache()})
+				container.cache(0, 0, container.width, container.height)
+				container.cacheTickOff = createjs.Ticker.on("tick", function (t) { container.updateCache() })
 			}
 			container.filters || (container.filters = [])
 			container.filters.push(filter)
