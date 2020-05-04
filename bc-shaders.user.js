@@ -49,7 +49,7 @@
 		}
 
 		function createMesh(gl, data) {
-			let VAO = gl.createVertexArray()
+			//let VAO = gl.createVertexArray()
 			let VBO = gl.createBuffer()
 			gl.bindBuffer(gl.ARRAY_BUFFER, VBO)
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.vertices), gl.STATIC_DRAW)
@@ -177,9 +177,9 @@
 				targetY
 			) {
 				let gl = GLSLFilter.gl
-				targetContext = targetContext || context
-				targetX = targetX || x
-				targetY = targetY || y
+				targetContext || (targetContext = context)
+				targetX || (targetX = x)
+				targetY || (targetY = y)
 
 				gl.bindTexture(gl.TEXTURE_2D, this.texture)
 				gl.texImage2D(
