@@ -120,7 +120,7 @@
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0)
 		}
 		var GLSLFilter = (() => {
-			function GLSLFilter({ shader, data }) {
+			function GLSLFilter({ dame,shader, data }) {
 				console.log("GLSLFilter")
 				let gl = GLSLFilter.gl
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER)
@@ -130,6 +130,7 @@
 				let quad = createScreenQuad(gl)
 				let texture = createTexture(gl)
 
+				this.name = name;
 				this.data = data
 
 				this.shader = program
@@ -219,7 +220,7 @@
 			return createjs.promote(GLSLFilter, "Filter")
 		})()
 
-		unsafeWindow.loadShader = function ({ fs, shader, container, uniforms } = {}) {
+		unsafeWindow.loadShader = function ({ name,fs, shader, container, uniforms } = {}) {
 			if (fs) {
 				shader = fs
 				console.warn('"fs" property is depricated, use "shader"')
@@ -227,7 +228,7 @@
 			if (!shader) throw "No shader!"
 			container || (container = GLSLFilter.DEFAULT_SHADER.container)
 			uniforms || (uniforms = GLSLFilter.DEFAULT_SHADER.uniforms)
-			let filter = new GLSLFilter({ shader, data: uniforms })
+			let filter = new GLSLFilter({ name,shader, data: uniforms })
 			container.stage.on("stagemousemove", function (e) {
 				filter.data.uMousePos = [e.rawX, e.rawY]
 			})
