@@ -120,7 +120,7 @@
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0)
 		}
 		var GLSLFilter = (() => {
-			function GLSLFilter({ name,shader, data }) {
+			function GLSLFilter({ name,shader, data,staticData }) {
 				console.log("GLSLFilter")
 				let gl = GLSLFilter.gl
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER)
@@ -131,7 +131,8 @@
 				let texture = createTexture(gl)
 
 				this.name = name;
-				this.data = data
+				this.data = data;
+				this.staticData = staticData;
 
 				this.shader = program
 				this.mesh = quad
@@ -198,13 +199,13 @@
 				gl.canvas.height = height
 				gl.viewport(0, 0, width, height)
 				gl.clearColor(0, 0, 0, 1)
-				gl.clear(gl.COLOR_BUFFER_BIT)
+				gl.clear(gl.COLOR_BUFFER_BIT);
 
-				render(gl, this.mesh, this.shader, this.texture, Object.assign({
-					uViewportSize: [width, height],
-					uRandom: Math.random(),
-					uTime: performance.now(),
-				}, this.data()))
+				this.staticData.uViewportSize = [width, height];
+				this.staticData.uRandom = Math.random();
+				this.staticData.uTime = performance.new();
+
+				render(gl, this.mesh, this.shader, this.texture, Object.assign(this.staticData, this.data()))
 
 				targetContext.setTransform(1, 0, 0, 1, 0, 0)
 				targetContext.clearRect(0, 0, width, height)
@@ -220,7 +221,7 @@
 			return createjs.promote(GLSLFilter, "Filter")
 		})()
 
-		unsafeWindow.loadShader = function ({ name,fs, shader, container, uniforms } = {}) {
+		unsafeWindow.loadShader = function ({ name,fs, shader, container, uniforms,staticUniforms } = {}) {
 			if (fs) {
 				shader = fs
 				console.warn('"fs" property is depricated, use "shader"')
@@ -228,9 +229,9 @@
 			if (!shader) throw "No shader!"
 			container || (container = GLSLFilter.DEFAULT_SHADER.container)
 			uniforms || (uniforms = GLSLFilter.DEFAULT_SHADER.uniforms)
-			let filter = new GLSLFilter({ name,shader, data: uniforms })
+			let filter = new GLSLFilter({ name,shader, data: uniforms,static:staticUniforms })
 			container.stage.on("stagemousemove", function (e) {
-				filter.data.uMousePos = [e.rawX, e.rawY]
+				filter.staticData.uMousePos = [e.rawX, e.rawY]
 			})
 			if (!container.bitmapCache) {
 				container.cache(0, 0, container.width, container.height)
