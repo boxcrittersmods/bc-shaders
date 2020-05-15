@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.53
+// @version      0.54
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/*
@@ -120,7 +120,7 @@
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0)
 		}
 		var GLSLFilter = (() => {
-			function GLSLFilter({ dame,shader, data }) {
+			function GLSLFilter({ name,shader, data }) {
 				console.log("GLSLFilter")
 				let gl = GLSLFilter.gl
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER)
