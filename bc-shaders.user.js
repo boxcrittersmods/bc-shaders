@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.56
+// @version      0.57
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/*
@@ -231,7 +231,7 @@
 			container || (container = GLSLFilter.DEFAULT_SHADER.container)
 			uniforms || (uniforms = GLSLFilter.DEFAULT_SHADER.uniforms),
 			staticUniforms|| (staticUniforms = GLSLFilter.DEFAULT_SHADER.staticUniforms);
-			let filter = new GLSLFilter({ name,shader, data: uniforms,static:staticUniforms })
+			let filter = new GLSLFilter({ name,shader, data: uniforms,staticData:staticUniforms })
 			container.stage.on("stagemousemove", function (e) {
 				filter.staticData.uMousePos = [e.rawX, e.rawY]
 			})
