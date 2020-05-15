@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.57
+// @version      0.58
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/*
@@ -204,7 +204,7 @@
 
 				this.staticData.uViewportSize = [width, height];
 				this.staticData.uRandom = Math.random();
-				this.staticData.uTime = performance.new();
+				this.staticData.uTime = performance.now();
 
 				render(gl, this.mesh, this.shader, this.texture, Object.assign(this.staticData, this.data()))
 
