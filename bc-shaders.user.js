@@ -4,7 +4,12 @@
 // @version      0.59
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
-// @match        https://play.boxcritters.com/*
+// @match        https://boxcritters.com/play/
+// @match        https://boxcritters.com/play/?*
+// @match        https://boxcritters.com/play/#*
+// @match        https://boxcritters.com/play/index.html
+// @match        https://boxcritters.com/play/index.html?*
+// @match        https://boxcritters.com/play/index.html#*
 // ==/UserScript==
 
 (function () {
