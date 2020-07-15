@@ -1,16 +1,15 @@
-
 loadShader({shader:`#version 300 es
-    precision mediump float;
-    
-    in vec2 vPixelCoord;
-    out vec4 fColor;
-    
+	precision mediump float;
+
+	in vec2 vPixelCoord;
+	out vec4 fColor;
+
 	uniform sampler2D uStageTex;
 	uniform vec2 uViewportSize;
 
-	vec2 pixelize(vec2 uv,vec2 screenSize,float pixelSize) {
-		float res = screenSize.x/screenSize.y;
-		float nx = screenSize.x/pixelSize;
+	vec2 pixelize(vec2 uv, vec2 screenSize, float pixelSize) {
+		float res = screenSize.x / screenSize.y;
+		float nx = screenSize.x / pixelSize;
 		float ny = floor(nx / res);
 		vec2 pos;
 		pos.x = floor(uv.x * nx) / nx;
@@ -18,47 +17,35 @@ loadShader({shader:`#version 300 es
 		return pos;
 	}
 
-	vec4 gameBoy(vec3 color) {
-		float gamma = 1.5;
-		color.r = pow(color.r,gamma);
-		color.g = pow(color.g,gamma);
-		color.b = pow(color.b,gamma);
+	vec4 gameBoy(vec3 color, float gamma) {
+		color.r = pow(color.r, gamma);
+		color.g = pow(color.g, gamma);
+		color.b = pow(color.b, gamma);
 
-		vec3 col1 = vec3(0.612, 0.725, 0.086);
-		vec3 col2 = vec3(0.549, 0.667, 0.078);
-		vec3 col3 = vec3(0.188, 0.392, 0.188);
-		vec3 col4 = vec3(0.063, 0.247, 0.063);
+		const int COLSLEN = 4;
+		vec3[4] cols = vec3[4](
+			vec3(.612, .725, .086),
+			vec3(.549, .667, .078),
+			vec3(.188, .392, .188),
+			vec3(.063, .247, .063)
+		);
 
-		float dist1 = length(color - col1);
-		float dist2 = length(color - col2);
-		float dist3 = length(color - col3);
-		float dist4 = length(color - col4);
+		float dist = distance(color, cols[0]);
+		vec3 colorout = cols[0];
+		for (int i = 1; i < COLSLEN; i++) {
+			float new = distance(color, cols[i]);
+			if (new < dist) {
+				dist = new;
+				colorout = cols[i];
+			}
+		}
 
-		float d = min(dist1, dist2);
-		d = min(d, dist3);
-		d = min(d, dist4);
-	  
-		if (d == dist1) {
-		  color = col1;
-		}    
-		else if (d == dist2) {
-		  color = col2;
-		}    
-		else if (d == dist3) {
-		  color = col3;
-		}    
-		else {
-		  color = col4;
-		} 
-		return vec4(color,1.0).rgba;
+		return vec4(colorout, 1.);
 	}
 
-
-	void main()
-	{
-		vec2 pos = pixelize(vPixelCoord,uViewportSize,1.1);
-		vec4 color = texture(uStageTex,pos);
-		fColor = gameBoy(color.xyz);
-	}	
-
+	void main() {
+		vec2 pos = pixelize(vPixelCoord, uViewportSize, 2.);
+		vec4 color = texture(uStageTex, pos);
+		fColor = gameBoy(color.xyz, 1.5);
+	}
 `})
