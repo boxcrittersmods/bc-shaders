@@ -14,19 +14,21 @@
 
 (function () {
 	'use strict'
-	console.info("-----------------------------------")
-	console.info("[BOX CRITTERS SHADER LOADER]")
-	console.info("A mod created by TumbleGamer, with help from SArpnt")
-	console.info("-----------------------------------")
+	console.info(
+`-----------------------------------
+[BOX CRITTERS SHADER LOADER]
+A mod created by TumbleGamer, with help from SArpnt
+-----------------------------------`
+	)
 	unsafeWindow.addEventListener('load', function () {
 		function createContext(width, height) {
 			let canvas = document.createElement("canvas")
 			canvas.width = width
 			canvas.height = height
-			//document.body.appendChild(canvas);
+			//document.body.appendChild(canvas)
 
 			let gl = canvas.getContext("webgl2") || canvas.getContext("webgl")
-			gl.clearColor(0.0, 0.0, 0.0, 1.0)
+			gl.clearColor(0, 0, 0, 1)
 			gl.clear(gl.COLOR_BUFFER_BIT)
 			return gl
 		}
@@ -74,8 +76,8 @@
 		}
 
 		function createScreenQuad(gl) {
-			let vertices = [-1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0]
-			let texCoords = [0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0]
+			let vertices = [-1, 1, -1, -1, 1, -1, 1, 1]
+			let texCoords = [0, 1, 0, 0, 1, 0, 1, 1]
 			let indices = [0, 1, 2, 0, 2, 3]
 			return createMesh(gl, { vertices, texCoords, indices })
 		}
@@ -125,7 +127,7 @@
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0)
 		}
 		var GLSLFilter = (() => {
-			function GLSLFilter({ name,shader, data,staticData }) {
+			function GLSLFilter({ name, shader, data, staticData }) {
 				console.log("GLSLFilter")
 				let gl = GLSLFilter.gl
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER)
@@ -135,9 +137,9 @@
 				let quad = createScreenQuad(gl)
 				let texture = createTexture(gl)
 
-				this.name = name;
-				this.data = data;
-				this.staticData = staticData;
+				this.name = name
+				this.data = data
+				this.staticData = staticData
 
 				this.shader = program
 				this.mesh = quad
@@ -150,11 +152,10 @@
 			GLSLFilter.VERTEX_SHADER = `#version 300 es
 				in vec4 aPos;
 				in vec2 aTexCoord;
-
 				out vec2 vPixelCoord;
 
-				void main(){
-					vPixelCoord = vec2(aTexCoord.x,1.0-aTexCoord.y);
+				void main() {
+					vPixelCoord = vec2(aTexCoord.x, 1. - aTexCoord.y);
 					gl_Position = aPos;
 				}`
 			GLSLFilter.DEFAULT_SHADER = {
@@ -165,7 +166,7 @@
 					out vec4 fColor;
 
 					void main() {
-						fColor = texture(uStageTex,vPixelCoord);
+						fColor = texture(uStageTex, vPixelCoord);
 					}`,
 				uniforms: _ => ({}),
 				staticUniforms: {},
@@ -198,18 +199,18 @@
 					gl.UNSIGNED_BYTE,
 					context.canvas
 				)
-				//gl.generateMipmap(gl.TEXTURE_2D);
+				//gl.generateMipmap(gl.TEXTURE_2D)
 				gl.bindTexture(gl.TEXTURE_2D, null)
 
 				gl.canvas.width = width
 				gl.canvas.height = height
 				gl.viewport(0, 0, width, height)
 				gl.clearColor(0, 0, 0, 1)
-				gl.clear(gl.COLOR_BUFFER_BIT);
+				gl.clear(gl.COLOR_BUFFER_BIT)
 
-				this.staticData.uViewportSize = [width, height];
-				this.staticData.uRandom = Math.random();
-				this.staticData.uTime = performance.now();
+				this.staticData.uViewportSize = [width, height]
+				this.staticData.uRandom = Math.random()
+				this.staticData.uTime = performance.now()
 
 				render(gl, this.mesh, this.shader, this.texture, Object.assign(this.staticData, this.data()))
 
@@ -227,7 +228,7 @@
 			return createjs.promote(GLSLFilter, "Filter")
 		})()
 
-		unsafeWindow.loadShader = function ({ name,fs, shader, container, uniforms,staticUniforms } = {}) {
+		unsafeWindow.loadShader = function ({ name, fs, shader, container, uniforms, staticUniforms } = {}) {
 			if (fs) {
 				shader = fs
 				console.warn('"fs" property is depricated, use "shader"')
@@ -235,14 +236,14 @@
 			if (!shader) throw "No shader!"
 			container || (container = GLSLFilter.DEFAULT_SHADER.container)
 			uniforms || (uniforms = GLSLFilter.DEFAULT_SHADER.uniforms),
-			staticUniforms|| (staticUniforms = GLSLFilter.DEFAULT_SHADER.staticUniforms);
-			let filter = new GLSLFilter({ name,shader, data: uniforms,staticData:staticUniforms })
+				staticUniforms || (staticUniforms = GLSLFilter.DEFAULT_SHADER.staticUniforms)
+			let filter = new GLSLFilter({ name, shader, data: uniforms, staticData: staticUniforms })
 			container.stage.on("stagemousemove", function (e) {
 				filter.staticData.uMousePos = [e.rawX, e.rawY]
 			})
 			if (!container.bitmapCache) {
 				container.cache(0, 0, container.width, container.height)
-				container.cacheTickOff = createjs.Ticker.on("tick", function (t) { container.updateCache() })
+				container.cacheTickOff = createjs.Ticker.on("tick", function (t) { container.updateCache(); })
 			}
 			container.filters || (container.filters = [])
 			container.filters.push(filter)
@@ -255,4 +256,4 @@
 			createjs.Ticker.off(container.cacheTickOff)
 		}
 	}, false)
-})()
+})();
