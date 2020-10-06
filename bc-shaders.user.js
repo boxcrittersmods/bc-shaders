@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.0.3.69
+// @version      0.0.3.50
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -178,36 +178,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				staticUniforms: {},
 				container: world.stage
 			};
-			GLSLFilter.createMesh = createMesh.bind(this, this.gl);
-			GLSLFilter.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
-				var gl = this.gl;
-				var texture = createTexture(gl);
-				const image = new Image();
-				image.crossOrigin = "Anonymous";
-				image.onload = function () {
-					gl.bindTexture(gl.TEXTURE_2D, texture);
-					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
-					if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-						gl.generateMipmap(gl.TEXTURE_2D);
-					} else {
-						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-					}
-				};
-				image.src = url;
-				var shader = this.shader;
-
-				return {
-					texture,
-					bind: function (samplerName, id = 1) {
-						var uTextLoc = gl.getUniformLocation(shader, samplerName);
-						gl.activeTexture(gl.TEXTURE0 + id);
-						gl.bindTexture(gl.TEXTURE_2D, texture);
-						gl.uniform1i(uTextLoc, id);
-					}
-				};
-			};
+			
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
@@ -254,6 +225,37 @@ A mod created by TumbleGamer, with help from SArpnt
 			};
 			p.toString = function () {
 				return "[GLSLFilter]";
+			};
+
+			p.createMesh = createMesh.bind(this, this.gl);
+			p.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
+				var gl = this.gl;
+				var texture = createTexture(gl);
+				const image = new Image();
+				image.crossOrigin = "Anonymous";
+				image.onload = function () {
+					gl.bindTexture(gl.TEXTURE_2D, texture);
+					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
+					if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+						gl.generateMipmap(gl.TEXTURE_2D);
+					} else {
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+					}
+				};
+				image.src = url;
+				var shader = this.shader;
+
+				return {
+					texture,
+					bind: function (samplerName, id = 1) {
+						var uTextLoc = gl.getUniformLocation(shader, samplerName);
+						gl.activeTexture(gl.TEXTURE0 + id);
+						gl.bindTexture(gl.TEXTURE_2D, texture);
+						gl.uniform1i(uTextLoc, id);
+					}
+				};
 			};
 
 			return createjs.promote(GLSLFilter, "Filter");
