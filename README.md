@@ -1,11 +1,14 @@
-# Hello World
+# Box Critters Shaders
 
 *Based off: [https://github.com/baseten/easelbender]*
 
-# Steps (for now)
-1. install https://boxcrittersmods.ga/tools/
-2. install https://github.com/boxcritters/bc-shaders/raw/master/bc-shaders.user.js
-# Sample Usage
+## Steps (for now)
+
+1. Install https://boxcrittersmods.ga/other/tampermonkey/
+2. Install https://github.com/boxcritters/bc-shaders/raw/master/bc-shaders.user.js
+
+## Sample Usage
+
 ```js
 loadShader({
 	shader:
@@ -23,7 +26,7 @@ loadShader({
 		uniform vec2 uCustomUniform;
 
 		void main() {
-			fColor = texture(uStageTex,vPixelCoord);
+			fColor = texture(uStageTex, vPixelCoord);
 		}`,
 	container: world.stage,
 	uniforms: function () {
@@ -32,14 +35,14 @@ loadShader({
 })
 ```
 
-# params
-{
+## params
+
 * shader: GLSL Shader
 * container: createjs stage to apply shader to
 * uniforms: Custom uniforms
-}
 
-# Built in uniforms
+## Built in uniforms
+
 * sampler2D uStageTex
 * float uTime
 * vec2 uViewportSize
