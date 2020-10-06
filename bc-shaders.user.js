@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.0.3.51
+// @version      0.0.3.61
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -263,14 +263,15 @@ A mod created by TumbleGamer, with help from SArpnt
 		unsafeWindow.loadShader = function ({ name, fs, shader,
 			container = GLSLFilter.DEFAULT_SHADER.container,
 			uniforms = GLSLFilter.DEFAULT_SHADER.uniforms,
-			staticUniforms = GLSLFilter.DEFAULT_SHADER.staticUniforms
+			staticUniforms = GLSLFilter.DEFAULT_SHADER.staticUniforms,
+			tick = ()=>0
 		} = {}) {
 			if (fs) {
 				shader = fs;
 				console.warn('"fs" property is depricated, use "shader"');
 			}
 			if (!shader) throw "No shader!";
-			let filter = new GLSLFilter({ name, shader, data: uniforms, staticData: staticUniforms });
+			let filter = new GLSLFilter({ name, shader, data: uniforms, staticData: staticUniforms,tick });
 			container.stage.on("stagemousemove", function (e) {
 				filter.staticData.uMousePos = [e.rawX, e.rawY];
 			});
