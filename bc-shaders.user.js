@@ -177,18 +177,12 @@ A mod created by TumbleGamer, with help from SArpnt
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0)
 			p.applyFilter = function (
 				context,
-				x,
-				y,
-				width,
-				height,
-				targetContext,
-				targetX,
-				targetY
+				x, y,
+				width, height,
+				targetContext = context,
+				targetX = x, targetY = y
 			) {
 				let gl = GLSLFilter.gl
-				targetContext || (targetContext = context)
-				targetX || (targetX = x)
-				targetY || (targetY = y)
 
 				gl.bindTexture(gl.TEXTURE_2D, this.texture)
 				gl.texImage2D(
