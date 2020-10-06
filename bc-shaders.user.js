@@ -115,8 +115,8 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
-			p.pass = function(shader,uniforms={},textures=[], aCoordName="vPixelCoord") {
-				if(!shader) return canvas;
+			p.pass = function (shader, uniforms = {}, textures = [], aCoordName = "vPixelCoord") {
+				if (!shader) return canvas;
 
 				var vertexShaderText = `#version 300 es
 				in vec4 aPos;
@@ -126,15 +126,15 @@ A mod created by TumbleGamer, with help from SArpnt
 				void main() {
 					${aCoordName} = vec2(aTexCoord.x, 1. - aTexCoord.y);
 					gl_Position = aPos;
-				}`
+				}`;
 
-				var gl = createContext(canvas.width,canvas.height);
+				var gl = createContext(canvas.width, canvas.height);
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderText);
 				let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, shader);
 				let program = createProgram(gl, vertexShader, fragmentShader);
 				if (!program) return canvas;
 
-				let mesh = createScreenQuad(gl);	
+				let mesh = createScreenQuad(gl);
 
 				gl.canvas.width = width;
 				gl.canvas.height = height;
@@ -154,61 +154,61 @@ A mod created by TumbleGamer, with help from SArpnt
 				gl.bindBuffer(gl.ARRAY_BUFFER, mesh.texCoordBuffer);
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
-			
+
 
 				//Bind Textures
-				for(let texture in textures) {
-					glActiveTexture(gl.TEXTURE0+texture)
-					glBindTexture(gl.TEXTURE_2D,textures[texture])
+				for (let texture in textures) {
+					glActiveTexture(gl.TEXTURE0 + texture);
+					glBindTexture(gl.TEXTURE_2D, textures[texture]);
 				}
 
-				for(let name in uniforms) {
-					var data = uniforms[name]
+				for (let name in uniforms) {
+					var data = uniforms[name];
 					var type = data[0];
 					var value = data[1];
 
 					var func = uniformFunc(type);
-					if(!func) continue;
-					var location = gl.getUniformLocation(program,name);
-					
-					gl[func](location,value);
+					if (!func) continue;
+					var location = gl.getUniformLocation(program, name);
+
+					gl[func](location, value);
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 				gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 
 				return gl.canvas;
-			}
-			
+			};
+
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
-			p.addShader = (s) =>{
-				this.shaders.push(s);
-			}
+			p.addShader = s => this.shaders.push(s);
 
-			p.parseUniforms = (uniforms)=> {
+			p.parseUniforms = (uniforms) => {
 				var textures = [];
 				for (const name in uniforms) {
-					var data = uniforms[name]
+					var data = uniforms[name];
 					var type = data[0];
 					var value = data[1];
 
-					if(typeof(value)=="function") value = value();
-					if(type=="sampler2D") {
-							var texture = this.createTexture(value);
-							type = "int"
-							value = textures.push(texture);
+					if (typeof (value) == "function")
+						value = value();
+
+					if (type == "sampler2D") {
+						var texture = this.createTexture(value);
+						type = "int";
+						value = textures.push(texture);
 					}
-					if(type.includes("sampler")) { 
+					if (type.includes("sampler")) {
 						uniforms[name] = undefined;
 						continue;
 					}
 
-					uniforms[name] = [type,value];
+					uniforms[name] = [type, value];
 				}
-				uniforms = uniforms.filter(u=>u!==undefined);
-				return {uniforms,textures}
-			}
+				uniforms = uniforms.filter(u => u !== undefined);
+				return { uniforms, textures };
+			};
 
 			p.applyFilter = function (
 				context,
@@ -218,11 +218,11 @@ A mod created by TumbleGamer, with help from SArpnt
 				targetX = x, targetY = y
 			) {
 
-				var canvas = context.canvas
-				for(let shader of this.shaders) {
-					shader.uniforms.uStageTex = ["int",canvas];
-					var {uniforms,textures} = this.parseUniforms(shader.uniforms);
-					canvas = this.pass(canvas,shader.shader,uniforms,textures);
+				var canvas = context.canvas;
+				for (let shader of this.shaders) {
+					shader.uniforms.uStageTex = ["int", canvas];
+					var { uniforms, textures } = this.parseUniforms(shader.uniforms);
+					canvas = this.pass(canvas, shader.shader, uniforms, textures);
 				}
 
 				targetContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -251,7 +251,6 @@ A mod created by TumbleGamer, with help from SArpnt
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 				gl.bindTexture(gl.TEXTURE_2D, null);
 
-				var image
 				switch (url.constuctor.name) {
 					case "String":
 						image = new Image();
@@ -271,7 +270,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						image.src = url;
 						break;
 					case "HTMLCanvasElement":
-						image = canvas;
+						const image = canvas;
 						gl.bindTexture(gl.TEXTURE_2D, texture);
 						gl.texImage2D(
 							gl.TEXTURE_2D,
@@ -285,35 +284,47 @@ A mod created by TumbleGamer, with help from SArpnt
 						break;
 				}
 
-				return texture
+				return texture;
 			};
 
 			return createjs.promote(GLSLFilter, "Filter");
 		})();
 
-		unsafeWindow.loadShader = function({ name, shaders = shader, container = world.stage, uniforms = {}, init, tick } = {}) {
+		unsafeWindow.loadShader = function ({
+			name,
+			shaders = shader,
+			container = GLSLFilter.DEFAULT_SHADER.container,
+			uniforms = GLSLFilter.DEFAULT_SHADER.uniforms,
+			init,
+			tick,
+		} = {}) {
 			if (typeof name != 'string')
 				throw `Invalid name!`;
 			if (loadedShaders.contains(name))
 				clearShader(name); // clearshader now only uses name
-		
+
 			if (typeof shaders == 'string')
 				shaders = [{ shaders }];
 			else if (typeof shaders != 'object' || shaders === null)
 				throw `No shader!`;
-		
 			for (let s of shaders) {
 				s = {
 					shader: s.shader,
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
 				};
-		
-				if (!s.container.filter)
-					s.container.filter = new GLSLFilter();
-				s.container.filter.addShader(s);
+
+				if (!s.container.GLSLFilter)
+					s.container.GLSLFilter = new GLSLFilter();
+				if (!container.bitmapCache) {
+					container.cache(0, 0, container.width, container.height);
+					container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+						container.updateCache();
+					});
+				}
+				s.container.GLSLFilter.addShader(s);
 			}
-		}
+		};
 		unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
 			container.filters = [];
 			createjs.Ticker.off(container.cacheTickOff);
