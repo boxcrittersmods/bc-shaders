@@ -178,7 +178,6 @@ A mod created by TumbleGamer, with help from SArpnt
 				staticUniforms: {},
 				container: world.stage
 			};
-			
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
