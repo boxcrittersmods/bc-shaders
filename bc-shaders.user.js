@@ -239,8 +239,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				let gl = GLSLFilter.gl;
 				let texture = createTexture(gl);
 
-				var image
-				switch(url.constuctir.name) {
+				switch(url.constuctor.name) {
 					case "String":
 						const image = new Image();
 						image.crossOrigin = "Anonymous";
@@ -258,7 +257,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						image.src = url;
 						break;
 					case "HTMLCanvasElement":
-						image = canvas;
+						const image = canvas;
 						break;
 				}
 				
@@ -282,14 +281,14 @@ A mod created by TumbleGamer, with help from SArpnt
 			container = GLSLFilter.DEFAULT_SHADER.container,
 			uniforms = GLSLFilter.DEFAULT_SHADER.uniforms,
 			staticUniforms = GLSLFilter.DEFAULT_SHADER.staticUniforms,
-			tick = ()=>0
+			tick = () => 0
 		} = {}) {
 			if (fs) {
 				shader = fs;
 				console.warn('"fs" property is depricated, use "shader"');
 			}
 			if (!shader) throw "No shader!";
-			let filter = new GLSLFilter({ name, shader, data: uniforms, staticData: staticUniforms,tick });
+			let filter = new GLSLFilter({ name, shader, data: uniforms, staticData: staticUniforms, tick });
 			container.stage.on("stagemousemove", function (e) {
 				filter.staticData.uMousePos = [e.rawX, e.rawY];
 			});
