@@ -78,6 +78,52 @@ A mod created by TumbleGamer, with help from SArpnt
 			return { data, VBO, texCoordBuffer, EBO };
 		}
 
+		function createTexture(gl,url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
+			let texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.bindTexture(gl.TEXTURE_2D, null);
+
+			var image
+			switch (url.constuctor.name) {
+				case "String":
+					image = new Image();
+					image.crossOrigin = "Anonymous";
+					image.onload = function () {
+						gl.bindTexture(gl.TEXTURE_2D, texture);
+						gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
+						if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+							gl.generateMipmap(gl.TEXTURE_2D);
+						} else {
+							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+						}
+						gl.bindTexture(gl.TEXTURE_2D, null);
+					};
+					image.src = url;
+					break;
+				case "HTMLCanvasElement":
+					image = canvas;
+					gl.bindTexture(gl.TEXTURE_2D, texture);
+					gl.texImage2D(
+						gl.TEXTURE_2D,
+						0,
+						gl.RGBA,
+						gl.RGBA,
+						gl.UNSIGNED_BYTE,
+						url
+					);
+					gl.bindTexture(gl.TEXTURE_2D, null);
+					break;
+			}
+
+			return texture
+		};
+
 		function createScreenQuad(gl) {
 			let vertices = [-1, 1, -1, -1, 1, -1, 1, 1];
 			let texCoords = [0, 1, 0, 0, 1, 0, 1, 1];
@@ -195,7 +241,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 					if(typeof(value)=="function") value = value();
 					if(type=="sampler2D") {
-							var texture = this.createTexture(value);
+							var texture = createTexture(value);
 							type = "int"
 							value = textures.push(texture);
 					}
@@ -238,54 +284,6 @@ A mod created by TumbleGamer, with help from SArpnt
 			};
 			p.toString = function () {
 				return "[GLSLFilter]";
-			};
-
-			p.createMesh = createMesh.bind(this, this.gl);
-			p.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
-				let gl = GLSLFilter.gl;
-				let texture = gl.createTexture();
-				gl.bindTexture(gl.TEXTURE_2D, texture);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-				gl.bindTexture(gl.TEXTURE_2D, null);
-
-				var image
-				switch (url.constuctor.name) {
-					case "String":
-						image = new Image();
-						image.crossOrigin = "Anonymous";
-						image.onload = function () {
-							gl.bindTexture(gl.TEXTURE_2D, texture);
-							gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
-							if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-								gl.generateMipmap(gl.TEXTURE_2D);
-							} else {
-								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-							}
-							gl.bindTexture(gl.TEXTURE_2D, null);
-						};
-						image.src = url;
-						break;
-					case "HTMLCanvasElement":
-						image = canvas;
-						gl.bindTexture(gl.TEXTURE_2D, texture);
-						gl.texImage2D(
-							gl.TEXTURE_2D,
-							0,
-							gl.RGBA,
-							gl.RGBA,
-							gl.UNSIGNED_BYTE,
-							url
-						);
-						gl.bindTexture(gl.TEXTURE_2D, null);
-						break;
-				}
-
-				return texture
 			};
 
 			return createjs.promote(GLSLFilter, "Filter");
