@@ -131,7 +131,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 		}
-		var GLSLFilter = (() => {
+		let GLSLFilter = (() => {
 			function GLSLFilter({ name, shader, data, staticData, tick }) {
 				console.log("GLSLFilter");
 				let gl = GLSLFilter.gl;
@@ -228,8 +228,8 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			p.createMesh = createMesh.bind(this, this.gl);
 			p.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
-				var gl = this.gl;
-				var texture = createTexture(gl);
+				let gl = GLSLFilter.gl;
+				let texture = createTexture(gl);
 				const image = new Image();
 				image.crossOrigin = "Anonymous";
 				image.onload = function () {
@@ -244,12 +244,12 @@ A mod created by TumbleGamer, with help from SArpnt
 					}
 				};
 				image.src = url;
-				var shader = this.shader;
+				let shader = this.shader;
 
 				return {
 					texture,
 					bind: function (samplerName, id = 1) {
-						var uTextLoc = gl.getUniformLocation(shader, samplerName);
+						let uTextLoc = gl.getUniformLocation(shader, samplerName);
 						gl.activeTexture(gl.TEXTURE0 + id);
 						gl.bindTexture(gl.TEXTURE_2D, texture);
 						gl.uniform1i(uTextLoc, id);
