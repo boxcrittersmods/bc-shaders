@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.0.3.68
+// @version      0.0.3.69
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -283,5 +283,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			container.filters = []
 			createjs.Ticker.off(container.cacheTickOff)
 		}
+
+		unsafeWindow.GLSLFilter = GLSLFilter;
 	}, false)
 })();
