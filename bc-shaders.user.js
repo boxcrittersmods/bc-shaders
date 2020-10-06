@@ -21,6 +21,9 @@ A mod created by TumbleGamer, with help from SArpnt
 -----------------------------------`
 	)
 	unsafeWindow.addEventListener('load', function () {
+		function isPowerOf2(value) {
+			return (value & (value - 1)) == 0;
+		}	
 		function createContext(width, height) {
 			let canvas = document.createElement("canvas")
 			canvas.width = width
@@ -172,6 +175,34 @@ A mod created by TumbleGamer, with help from SArpnt
 				staticUniforms: {},
 				container: world.stage
 			}
+			GLSLFilter.createMesh = createMesh.bind(this,this.gl);
+			GLSLFilter.createTexture = function(url,level=0,internalFormat=GLSLFilter.gl.RGBA,format=GLSLFilter.gl.RGBA,type=GLSLFilter.gl.UNSIGNED_BYTE) {
+				var gl = this.gl;
+				var texture = createTexture(gl);
+				const image = new Image();
+				image.onload(function() {
+					gl.bindTexture(gl.TEXTURE_2D,texture);
+					gl.texImage2D(g.TEXTURE_2D,level,internalFormat,format,type,image);
+					if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+						gl.generateMipmap(gl.TEXTURE_2D);
+					 } else {
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+					 }
+				})
+				image.src = url;
+				var shader = this.shader;
+
+				return {texture:texture,bind:(samplerName,id)=>{
+					if(id<1)id++;
+					var uTextLoc = gl.getUniformLocation(shader, samplerName)
+					gl.activeTexture(gl.TEXTURE0+id);
+					gl.bindTexture(gl.TEXTURE_2D, texture)
+					gl.uniform1i(uTextLoc, id);
+				}}
+			}
+
 			let p = createjs.extend(GLSLFilter, createjs.Filter)
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0)
