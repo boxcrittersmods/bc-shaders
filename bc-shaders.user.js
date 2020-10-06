@@ -161,7 +161,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
-			p.pass = function(shader,uniforms={},textures=[], aCoordName="vPixelCoord") {
+			p.pass = function(shader,uniforms={}, aCoordName="vPixelCoord") {
 				if(!shader) return canvas;
 
 				var vertexShaderText = `#version 300 es
@@ -200,24 +200,34 @@ A mod created by TumbleGamer, with help from SArpnt
 				gl.bindBuffer(gl.ARRAY_BUFFER, mesh.texCoordBuffer);
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
-			
 
-				//Bind Textures
-				for(let texture in textures) {
-					glActiveTexture(gl.TEXTURE0+texture)
-					glBindTexture(gl.TEXTURE_2D,textures[texture])
-				}
-
+				var textures;
 				for(let name in uniforms) {
 					var data = uniforms[name]
 					var type = data[0];
 					var value = data[1];
+
+					if(typeof(value)=="function") value = value();
+					if(type=="sampler2D") {
+							var texture = createTexture(gl,value);
+							type = "int"
+							value = textures.push(texture);
+					}
+					if(type.includes("sampler")) { 
+						uniforms[name] = undefined;
+						continue;
+					}
 
 					var func = uniformFunc(type);
 					if(!func) continue;
 					var location = gl.getUniformLocation(program,name);
 					
 					gl[func](location,value);
+				}
+				//Bind Textures
+				for(let texture in textures) {
+					glActiveTexture(gl.TEXTURE0+texture)
+					glBindTexture(gl.TEXTURE_2D,textures[texture])
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
@@ -230,30 +240,6 @@ A mod created by TumbleGamer, with help from SArpnt
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
 			p.addShader = (s) =>{
 				this.shaders.push(s);
-			}
-
-			p.parseUniforms = (uniforms)=> {
-				var textures = [];
-				for (const name in uniforms) {
-					var data = uniforms[name]
-					var type = data[0];
-					var value = data[1];
-
-					if(typeof(value)=="function") value = value();
-					if(type=="sampler2D") {
-							var texture = createTexture(value);
-							type = "int"
-							value = textures.push(texture);
-					}
-					if(type.includes("sampler")) { 
-						uniforms[name] = undefined;
-						continue;
-					}
-
-					uniforms[name] = [type,value];
-				}
-				uniforms = uniforms.filter(u=>u!==undefined);
-				return {uniforms,textures}
 			}
 
 			p.applyFilter = function (
@@ -310,6 +296,12 @@ A mod created by TumbleGamer, with help from SArpnt
 				if (!s.container.filter)
 					s.container.filter = new GLSLFilter();
 				s.container.filter.addShader(s);
+			}
+			if (!container.bitmapCache) {
+				container.cache(0, 0, container.width, container.height);
+				container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+					container.updateCache();
+				});
 			}
 		}
 		unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
