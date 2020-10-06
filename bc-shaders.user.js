@@ -295,23 +295,22 @@ A mod created by TumbleGamer, with help from SArpnt
 
 				if (!s.container.filter) {
 					s.container.filters || (container.filters = []);
-					s.container.filters.push(new GLSLFilter()));
+					s.container.filters.push(new GLSLFilter());
 
-	if (!s.container.bitmapCache) {
-		s.container.cache(0, 0, container.width, container.height);
-		s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
-			s.container.updateCache();
-		});
-	}
-}
-				s.container.filter.addShader(s);
+					if (!s.container.bitmapCache) {
+						s.container.cache(0, 0, container.width, container.height);
+						s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+							s.container.updateCache();
+						});
+					}
+					s.container.filter.addShader(s);
+				}
 			}
-		}
-unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
-	container.filters = [];
-	createjs.Ticker.off(container.cacheTickOff);
-};
+			unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
+				container.filters = [];
+				createjs.Ticker.off(container.cacheTickOff);
+			};
 
-unsafeWindow.GLSLFilter = GLSLFilter;
-	}, false);
-}) ();
+			unsafeWindow.GLSLFilter = GLSLFilter;
+		}, false);
+})();
