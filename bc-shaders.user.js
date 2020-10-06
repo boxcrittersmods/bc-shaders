@@ -87,7 +87,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			var image;
+			let image;
 			switch (url.constuctor.name) {
 				case "String":
 					image = new Image();
@@ -164,7 +164,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			p.pass = function (shader, uniforms = {}, aCoordName = "vPixelCoord") {
 				if (!shader) return canvas;
 
-				var vertexShaderText = `#version 300 es
+				let vertexShaderText = `#version 300 es
 				in vec4 aPos;
 				in vec2 aTexCoord;
 				out vec2 ${aCoordName};
@@ -174,7 +174,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					gl_Position = aPos;
 				}`;
 
-				var gl = createContext(canvas.width, canvas.height);
+				let gl = createContext(canvas.width, canvas.height);
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderText);
 				let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, shader);
 				let program = createProgram(gl, vertexShader, fragmentShader);
@@ -201,15 +201,13 @@ A mod created by TumbleGamer, with help from SArpnt
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
 
-				var textures;
+				let textures;
 				for (let name in uniforms) {
-					var data = uniforms[name];
-					var type = data[0];
-					var value = data[1];
+					let [type, value] = uniforms[name];
 
 					if (typeof (value) == "function") value = value();
 					if (type == "sampler2D") {
-						var texture = createTexture(gl, value);
+						let texture = createTexture(gl, value);
 						type = "int";
 						value = textures.push(texture);
 					}
@@ -218,9 +216,9 @@ A mod created by TumbleGamer, with help from SArpnt
 						continue;
 					}
 
-					var func = uniformFunc(type);
+					let func = uniformFunc(type);
 					if (!func) continue;
-					var location = gl.getUniformLocation(program, name);
+					let location = gl.getUniformLocation(program, name);
 
 					gl[func](location, value);
 				}
@@ -248,24 +246,21 @@ A mod created by TumbleGamer, with help from SArpnt
 				targetContext = context,
 				targetX = x, targetY = y
 			) {
-
-				var canvas = context.canvas;
+				let canvas = context.canvas;
 				for (let shader of this.shaders) {
 					shader.uniforms.uStageTex = ["int", canvas];
-					var { uniforms, textures } = this.parseUniforms(shader.uniforms);
+					let { uniforms, textures } = this.parseUniforms(shader.uniforms);
 					canvas = this.pass(canvas, shader.shader, uniforms, textures);
 				}
 
 				targetContext.setTransform(1, 0, 0, 1, 0, 0);
 				targetContext.clearRect(0, 0, width, height);
-				targetContext.drawImage(gl.canvas, targetX, targetY);
+				targetContext.drawImage(canvas, targetX, targetY);
 			};
 			p.clone = function () {
-				var filter = new GLSLFilter();
-				for (const shader of shaders) {
+				let filter = new GLSLFilter();
+				for (const shader of shaders)
 					filter.addShader(shader);
-				}
-
 			};
 			p.toString = function () {
 				return "[GLSLFilter]";
