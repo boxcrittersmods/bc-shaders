@@ -78,6 +78,52 @@ A mod created by TumbleGamer, with help from SArpnt
 			return { data, VBO, texCoordBuffer, EBO };
 		}
 
+		function createTexture(gl, url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
+			let texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			gl.bindTexture(gl.TEXTURE_2D, null);
+
+			var image;
+			switch (url.constuctor.name) {
+				case "String":
+					image = new Image();
+					image.crossOrigin = "Anonymous";
+					image.onload = function () {
+						gl.bindTexture(gl.TEXTURE_2D, texture);
+						gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
+						if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+							gl.generateMipmap(gl.TEXTURE_2D);
+						} else {
+							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+						}
+						gl.bindTexture(gl.TEXTURE_2D, null);
+					};
+					image.src = url;
+					break;
+				case "HTMLCanvasElement":
+					image = canvas;
+					gl.bindTexture(gl.TEXTURE_2D, texture);
+					gl.texImage2D(
+						gl.TEXTURE_2D,
+						0,
+						gl.RGBA,
+						gl.RGBA,
+						gl.UNSIGNED_BYTE,
+						url
+					);
+					gl.bindTexture(gl.TEXTURE_2D, null);
+					break;
+			}
+
+			return texture;
+		};
+
 		function createScreenQuad(gl) {
 			let vertices = [-1, 1, -1, -1, 1, -1, 1, 1];
 			let texCoords = [0, 1, 0, 0, 1, 0, 1, 1];
@@ -115,7 +161,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
-			p.pass = function (shader, uniforms = {}, textures = [], aCoordName = "vPixelCoord") {
+			p.pass = function (shader, uniforms = {}, aCoordName = "vPixelCoord") {
 				if (!shader) return canvas;
 
 				var vertexShaderText = `#version 300 es
@@ -155,23 +201,33 @@ A mod created by TumbleGamer, with help from SArpnt
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
 
-
-				//Bind Textures
-				for (let texture in textures) {
-					glActiveTexture(gl.TEXTURE0 + texture);
-					glBindTexture(gl.TEXTURE_2D, textures[texture]);
-				}
-
+				var textures;
 				for (let name in uniforms) {
 					var data = uniforms[name];
 					var type = data[0];
 					var value = data[1];
+
+					if (typeof (value) == "function") value = value();
+					if (type == "sampler2D") {
+						var texture = createTexture(gl, value);
+						type = "int";
+						value = textures.push(texture);
+					}
+					if (type.includes("sampler")) {
+						uniforms[name] = undefined;
+						continue;
+					}
 
 					var func = uniformFunc(type);
 					if (!func) continue;
 					var location = gl.getUniformLocation(program, name);
 
 					gl[func](location, value);
+				}
+				//Bind Textures
+				for (let texture in textures) {
+					glActiveTexture(gl.TEXTURE0 + texture);
+					glBindTexture(gl.TEXTURE_2D, textures[texture]);
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
@@ -185,33 +241,6 @@ A mod created by TumbleGamer, with help from SArpnt
 			p.addShader = function (shader) {
 				return this.shaders.push(shader);
 			};
-
-			p.parseUniforms = uniforms => {
-				var textures = [];
-				for (const name in uniforms) {
-					var data = uniforms[name];
-					var type = data[0];
-					var value = data[1];
-
-					if (typeof (value) == "function")
-						value = value();
-
-					if (type == "sampler2D") {
-						var texture = this.createTexture(value);
-						type = "int";
-						value = textures.push(texture);
-					}
-					if (type.includes("sampler")) {
-						uniforms[name] = undefined;
-						continue;
-					}
-
-					uniforms[name] = [type, value];
-				}
-				uniforms = uniforms.filter(u => u !== undefined);
-				return { uniforms, textures };
-			};
-
 			p.applyFilter = function (
 				context,
 				x, y,
@@ -242,53 +271,6 @@ A mod created by TumbleGamer, with help from SArpnt
 				return "[GLSLFilter]";
 			};
 
-			p.createMesh = createMesh.bind(this, this.gl);
-			p.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
-				let gl = GLSLFilter.gl;
-				let texture = gl.createTexture();
-				gl.bindTexture(gl.TEXTURE_2D, texture);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-				gl.bindTexture(gl.TEXTURE_2D, null);
-
-				switch (url.constuctor.name) {
-					case "String":
-						image = new Image();
-						image.crossOrigin = "Anonymous";
-						image.onload = function () {
-							gl.bindTexture(gl.TEXTURE_2D, texture);
-							gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
-							if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-								gl.generateMipmap(gl.TEXTURE_2D);
-							} else {
-								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-							}
-							gl.bindTexture(gl.TEXTURE_2D, null);
-						};
-						image.src = url;
-						break;
-					case "HTMLCanvasElement":
-						const image = canvas;
-						gl.bindTexture(gl.TEXTURE_2D, texture);
-						gl.texImage2D(
-							gl.TEXTURE_2D,
-							0,
-							gl.RGBA,
-							gl.RGBA,
-							gl.UNSIGNED_BYTE,
-							url
-						);
-						gl.bindTexture(gl.TEXTURE_2D, null);
-						break;
-				}
-
-				return texture;
-			};
-
 			return createjs.promote(GLSLFilter, "Filter");
 		})();
 
@@ -311,6 +293,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				shaders = [{ shaders }];
 			else if (typeof shaders != 'object' || shaders === null)
 				throw `No shader!`;
+
 			for (let s of shaders) {
 				s = {
 					shader: s.shader,
@@ -318,12 +301,15 @@ A mod created by TumbleGamer, with help from SArpnt
 					uniforms: s.uniforms || uniforms,
 				};
 
-				if (!s.container.GLSLFilter)
+				if (!s.container.GLSLFilter) {
 					s.container.GLSLFilter = new GLSLFilter();
-				if (!container.bitmapCache) {
-					container.cache(0, 0, container.width, container.height);
-					container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
-						container.updateCache();
+					s.container.filters || (s.container.filters = []);
+					s.container.filters.push(new GLSLFilter());
+				}
+				if (!s.container.bitmapCache) {
+					s.container.cache(0, 0, container.width, container.height);
+					s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+						s.container.updateCache();
 					});
 				}
 				s.container.GLSLFilter.addShader(s);
