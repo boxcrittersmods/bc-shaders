@@ -226,24 +226,38 @@ A mod created by TumbleGamer, with help from SArpnt
 				return "[GLSLFilter]";
 			};
 
+			p.createContext = createContext;
+			p.createShader = createShader;
+			p.createProgram = createProgram;
+
 			p.createMesh = createMesh.bind(this, this.gl);
 			p.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
 				let gl = GLSLFilter.gl;
 				let texture = createTexture(gl);
-				const image = new Image();
-				image.crossOrigin = "Anonymous";
-				image.onload = function () {
-					gl.bindTexture(gl.TEXTURE_2D, texture);
-					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
-					if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-						gl.generateMipmap(gl.TEXTURE_2D);
-					} else {
-						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-					}
-				};
-				image.src = url;
+
+				var image
+				switch(url.constuctir.name) {
+					case "String":
+						const image = new Image();
+						image.crossOrigin = "Anonymous";
+						image.onload = function () {
+							gl.bindTexture(gl.TEXTURE_2D, texture);
+							gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
+							if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+								gl.generateMipmap(gl.TEXTURE_2D);
+							} else {
+								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+								gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+							}
+						};
+						image.src = url;
+						break;
+					case "HTMLCanvasElement":
+						image = canvas;
+						break;
+				}
+				
 				let shader = this.shader;
 
 				return {
