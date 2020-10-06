@@ -303,8 +303,8 @@ A mod created by TumbleGamer, with help from SArpnt
 							s.container.updateCache();
 						});
 					}
-					s.container.filter.addShader(s);
 				}
+					s.container.filter.addShader(s);
 			}
 			unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
 				container.filters = [];
