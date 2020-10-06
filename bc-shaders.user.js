@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.0.4.61
+// @version      0.0.5.63
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -185,6 +185,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			GLSLFilter.createShader = createShader;
 			GLSLFilter.createProgram = createProgram;
 			GLSLFilter.createFullScreenMesh = createScreenQuad
+			GLSLFilter.render = render;
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
