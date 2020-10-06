@@ -159,7 +159,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				this.usesContext = true;
 			}
 
-			let p = createjs.extend(GLSLFilter, createjs.Filter);//<----     Hi Hi look here
+			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
 			p.pass = function (shader, uniforms = {}, aCoordName = "vPixelCoord") {
 				if (!shader) return canvas;
