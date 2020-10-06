@@ -294,7 +294,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				};
 
 				if (!s.container.filter) {
-					s.container.filters || (container.filters = []);
+					s.container.filters || (s.container.filters = []);
 					s.container.filters.push(new GLSLFilter());
 
 					if (!s.container.bitmapCache) {
