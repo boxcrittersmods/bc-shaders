@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.0.2.67
+// @version      0.0.3.68
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -97,7 +97,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			return texture
 		}
 
-		function render(gl, mesh, shader, texture, data = {}) {
+		function render(gl, mesh, shader, texture, data = {},tick=function(){}) {
 			gl.useProgram(shader)
 
 			let aPosLoc = gl.getAttribLocation(shader, "aPos")
@@ -126,11 +126,13 @@ A mod created by TumbleGamer, with help from SArpnt
 						gl.uniform1f(location, value)
 			}
 
+			tick(gl);
+
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO)
 			gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0)
 		}
 		var GLSLFilter = (() => {
-			function GLSLFilter({ name, shader, data, staticData }) {
+			function GLSLFilter({ name, shader, data, staticData, tick }) {
 				console.log("GLSLFilter")
 				let gl = GLSLFilter.gl
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, GLSLFilter.VERTEX_SHADER)
@@ -143,6 +145,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				this.name = name
 				this.data = data
 				this.staticData = staticData
+				this.tick = tick;
 
 				this.shader = program
 				this.mesh = quad
@@ -237,7 +240,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				this.staticData.uRandom = Math.random()
 				this.staticData.uTime = performance.now()
 
-				render(gl, this.mesh, this.shader, this.texture, Object.assign(this.staticData, this.data()))
+				render(gl, this.mesh, this.shader, this.texture, Object.assign(this.staticData, this.data()),this.tick)
 
 				targetContext.setTransform(1, 0, 0, 1, 0, 0)
 				targetContext.clearRect(0, 0, width, height)
