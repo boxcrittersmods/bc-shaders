@@ -182,9 +182,11 @@ A mod created by TumbleGamer, with help from SArpnt
 
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
-			p.addShader = s => this.shaders.push(s);
+			p.addShader = function (shader) {
+				return this.shaders.push(shader);
+			};
 
-			p.parseUniforms = (uniforms) => {
+			p.parseUniforms = uniforms => {
 				var textures = [];
 				for (const name in uniforms) {
 					var data = uniforms[name];
@@ -290,18 +292,20 @@ A mod created by TumbleGamer, with help from SArpnt
 			return createjs.promote(GLSLFilter, "Filter");
 		})();
 
-		unsafeWindow.loadShader = function ({
+		let loadedShaderpacks = [];
+		unsafeWindow.loadShaderpack = function ({
 			name,
+			shader,
 			shaders = shader,
-			container = GLSLFilter.DEFAULT_SHADER.container,
-			uniforms = GLSLFilter.DEFAULT_SHADER.uniforms,
+			container = world.stage,
+			uniforms = {},
 			init,
 			tick,
 		} = {}) {
 			if (typeof name != 'string')
 				throw `Invalid name!`;
-			if (loadedShaders.contains(name))
-				clearShader(name); // clearshader now only uses name
+			if (loadedShaderpacks.includes(name))
+				clearShaderpack(name);
 
 			if (typeof shaders == 'string')
 				shaders = [{ shaders }];
@@ -324,10 +328,16 @@ A mod created by TumbleGamer, with help from SArpnt
 				}
 				s.container.GLSLFilter.addShader(s);
 			}
+
+			loadedShaderpacks.push(name);
 		};
-		unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
-			container.filters = [];
-			createjs.Ticker.off(container.cacheTickOff);
+		unsafeWindow.clearShaderpack = function (name) {
+			if (!loadedShaderpacks.contains(name))
+				return;
+			console.error('This function needs to remove the old shader!');
+			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
+			//container.filters = [];
+			//createjs.Ticker.off(container.cacheTickOff);
 		};
 
 		unsafeWindow.GLSLFilter = GLSLFilter;
