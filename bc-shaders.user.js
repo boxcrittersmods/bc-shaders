@@ -87,7 +87,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			var image
+			var image;
 			switch (url.constuctor.name) {
 				case "String":
 					image = new Image();
@@ -121,7 +121,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					break;
 			}
 
-			return texture
+			return texture;
 		};
 
 		function createScreenQuad(gl) {
@@ -172,7 +172,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				void main() {
 					${aCoordName} = vec2(aTexCoord.x, 1. - aTexCoord.y);
 					gl_Position = aPos;
-				}`
+				}`;
 
 				var gl = createContext(canvas.width, canvas.height);
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderText);
@@ -203,14 +203,14 @@ A mod created by TumbleGamer, with help from SArpnt
 
 				var textures;
 				for (let name in uniforms) {
-					var data = uniforms[name]
+					var data = uniforms[name];
 					var type = data[0];
 					var value = data[1];
 
 					if (typeof (value) == "function") value = value();
 					if (type == "sampler2D") {
 						var texture = createTexture(gl, value);
-						type = "int"
+						type = "int";
 						value = textures.push(texture);
 					}
 					if (type.includes("sampler")) {
@@ -226,22 +226,21 @@ A mod created by TumbleGamer, with help from SArpnt
 				}
 				//Bind Textures
 				for (let texture in textures) {
-					glActiveTexture(gl.TEXTURE0 + texture)
-					glBindTexture(gl.TEXTURE_2D, textures[texture])
+					glActiveTexture(gl.TEXTURE0 + texture);
+					glBindTexture(gl.TEXTURE_2D, textures[texture]);
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 				gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
 
 				return gl.canvas;
-			}
+			};
 
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
-			p.addShader = (s) => {
-				this.shaders.push(s);
-			}
-
+			p.addShader = function (shader) {
+				return this.shaders.push(shader);
+			};
 			p.applyFilter = function (
 				context,
 				x, y,
@@ -250,7 +249,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				targetX = x, targetY = y
 			) {
 
-				var canvas = context.canvas
+				var canvas = context.canvas;
 				for (let shader of this.shaders) {
 					shader.uniforms.uStageTex = ["int", canvas];
 					var { uniforms, textures } = this.parseUniforms(shader.uniforms);
@@ -275,11 +274,20 @@ A mod created by TumbleGamer, with help from SArpnt
 			return createjs.promote(GLSLFilter, "Filter");
 		})();
 
-		unsafeWindow.loadShader = function ({ name, shaders = shader, container = world.stage, uniforms = {}, init, tick } = {}) {
+		let loadedShaderpacks = [];
+		unsafeWindow.loadShaderpack = function ({
+			name,
+			shader,
+			shaders = shader,
+			container = world.stage,
+			uniforms = {},
+			init,
+			tick,
+		} = {}) {
 			if (typeof name != 'string')
 				throw `Invalid name!`;
-			if (loadedShaders.contains(name))
-				clearShader(name); // clearshader now only uses name
+			if (loadedShaderpacks.includes(name))
+				clearShaderpack(name);
 
 			if (typeof shaders == 'string')
 				shaders = [{ shaders }];
@@ -293,24 +301,31 @@ A mod created by TumbleGamer, with help from SArpnt
 					uniforms: s.uniforms || uniforms,
 				};
 
-				if (!s.container.filter) {
+				if (!s.container.GLSLFilter) {
+					s.container.GLSLFilter = new GLSLFilter();
 					s.container.filters || (s.container.filters = []);
 					s.container.filters.push(new GLSLFilter());
-
-					if (!s.container.bitmapCache) {
-						s.container.cache(0, 0, container.width, container.height);
-						s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
-							s.container.updateCache();
-						});
-					}
 				}
-					s.container.filter.addShader(s);
+				if (!s.container.bitmapCache) {
+					s.container.cache(0, 0, container.width, container.height);
+					s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+						s.container.updateCache();
+					});
+				}
+				s.container.GLSLFilter.addShader(s);
 			}
-			unsafeWindow.clearShaders = function (container = GLSLFilter.DEFAULT_SHADER.container) {
-				container.filters = [];
-				createjs.Ticker.off(container.cacheTickOff);
-			};
 
-			unsafeWindow.GLSLFilter = GLSLFilter;
-		}, false);
+			loadedShaderpacks.push(name);
+		};
+		unsafeWindow.clearShaderpack = function (name) {
+			if (!loadedShaderpacks.contains(name))
+				return;
+			console.error('This function needs to remove the old shader!');
+			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
+			//container.filters = [];
+			//createjs.Ticker.off(container.cacheTickOff);
+		};
+
+		unsafeWindow.GLSLFilter = GLSLFilter;
+	}, false);
 })();
