@@ -179,6 +179,13 @@ A mod created by TumbleGamer, with help from SArpnt
 				container: world.stage
 			};
 
+			
+
+			GLSLFilter.createContext = createContext;
+			GLSLFilter.createShader = createShader;
+			GLSLFilter.createProgram = createProgram;
+			GLSLFilter.createFullScreenMesh = createScreenQuad
+
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
@@ -225,10 +232,6 @@ A mod created by TumbleGamer, with help from SArpnt
 			p.toString = function () {
 				return "[GLSLFilter]";
 			};
-
-			p.createContext = createContext;
-			p.createShader = createShader;
-			p.createProgram = createProgram;
 
 			p.createMesh = createMesh.bind(this, this.gl);
 			p.createTexture = function (url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
