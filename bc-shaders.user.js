@@ -257,7 +257,18 @@ A mod created by TumbleGamer, with help from SArpnt
 				if (this.container.bitmapCache[st] < shader.resolution) {
 					this.container.bitmapCache[st] = shader.resolution;
 					if (hr)
-						unsafeWindow.world.stage.hUpdate()
+						unsafeWindow.world.stage.hUpdate();
+				}
+
+				for (let i in shader.crop) {
+					let param = ['x', 'y', 'width', 'height'][i],
+						comp = ['width', 'height', 'width', 'height'][i],
+						act = ['max', 'max', 'min', 'min'][i];
+
+					this.container.bitmapCache[param] = Math[act](
+						this.container.bitmapCache[param],
+						shader.crop[i] * this.container[comp]
+					);
 				}
 
 				return this.shaders.push(shader);
@@ -305,6 +316,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			container = world.stage,
 			uniforms = {},
 			resolution = 1,
+			crop = [0, 0, 1, 1],
 			init,
 			tick,
 		} = {}) {
@@ -324,6 +336,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
 					resolution: s.resolution || resolution,
+					crop: s.crop || crop,
 				};
 
 				if (!s.container.GLSLFilter)
@@ -334,7 +347,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			loadedShaderpacks.push(name);
 		};
 		unsafeWindow.clearShaderpack = function (name) {
-			if (!loadedShaderpacks.contains(name))
+			if (!loadedShaderpacks.includes(name))
 				return;
 			console.error('This function needs to remove the old shader!');
 			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
