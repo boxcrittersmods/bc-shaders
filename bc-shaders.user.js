@@ -163,7 +163,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				return this.gl;
 			};
 
-			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vPixelCoord") {
+			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vStageCoord") {
 				if (!shader) return canvas;
 
 				let vertexShaderText = `#version 300 es
