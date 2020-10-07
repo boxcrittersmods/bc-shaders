@@ -139,8 +139,21 @@ A mod created by TumbleGamer, with help from SArpnt
 
 		let GLSLFilter = (() => {
 
-			function GLSLFilter() {
+			function GLSLFilter(container) {
 				console.log("GLSLFilter created");
+
+				this.container = container;
+				container.GLSLFilter = this;
+
+				container.filters || (container.filters = []);
+				container.filters.push(this);
+
+				if (!container.bitmapCache) {
+					container.cache(0, 0, container.width, container.height);
+					container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+						container.updateCache();
+					});
+				}
 
 				this.shaders = [];
 				this.usesContext = true;
@@ -239,6 +252,14 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
 			p.addShader = function (shader) {
+				let hr = typeof this.container.bitmapCache.hScale != 'undefined',
+					st = hr ? 'hScale' : 'scale';
+				if (this.container.bitmapCache[st] < shader.resolution) {
+					this.container.bitmapCache[st] = shader.resolution;
+					if (hr)
+						unsafeWindow.world.stage.hUpdate()
+				}
+
 				return this.shaders.push(shader);
 			};
 			p.applyFilter = function (
@@ -283,6 +304,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			shaders = shader,
 			container = world.stage,
 			uniforms = {},
+			resolution = 1,
 			init,
 			tick,
 		} = {}) {
@@ -301,19 +323,11 @@ A mod created by TumbleGamer, with help from SArpnt
 					shader: s.shader,
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
+					resolution: s.resolution || resolution,
 				};
 
-				if (!s.container.GLSLFilter) {
-					s.container.GLSLFilter = new GLSLFilter();
-					s.container.filters || (s.container.filters = []);
-					s.container.filters.push(s.container.GLSLFilter);
-				}
-				if (!s.container.bitmapCache) {
-					s.container.cache(0, 0, container.width, container.height);
-					s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
-						s.container.updateCache();
-					});
-				}
+				if (!s.container.GLSLFilter)
+					new GLSLFilter(s.container);
 				s.container.GLSLFilter.addShader(s);
 			}
 
