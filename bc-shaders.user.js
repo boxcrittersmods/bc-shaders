@@ -246,16 +246,18 @@ A mod created by TumbleGamer, with help from SArpnt
 				targetContext = context,
 				targetX = x, targetY = y
 			) {
-				let canvas = context.canvas;
-				for (let shader of this.shaders) {
-					shader.uniforms.uStageTex = ["int", canvas];
-					let { uniforms, textures } = this.parseUniforms(shader.uniforms);
-					canvas = this.pass(canvas, shader.shader, uniforms, textures);
-				}
+				if (this.shaders.length) {
+					let canvas = context.canvas;
 
-				targetContext.setTransform(1, 0, 0, 1, 0, 0);
-				targetContext.clearRect(0, 0, width, height);
-				targetContext.drawImage(canvas, targetX, targetY);
+					for (let shader of this.shaders) {
+						shader.uniforms.uStageTex = ["sampler2D", canvas];
+						let { uniforms, textures } = this.parseUniforms(shader.uniforms);
+						canvas = this.pass(canvas, shader.shader, uniforms, textures);
+					}
+
+					targetContext.clearRect(0, 0, width, height);
+					targetContext.drawImage(canvas, targetX, targetY);
+				}
 			};
 			p.clone = function () {
 				let filter = new GLSLFilter();
