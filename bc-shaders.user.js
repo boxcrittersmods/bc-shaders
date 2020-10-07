@@ -162,6 +162,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			};
 
 			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vStageCoord") {
+				console.log("PASS")
 				if (!shader) return canvas;
 
 				let vertexShaderText = `#version 300 es
@@ -201,15 +202,18 @@ A mod created by TumbleGamer, with help from SArpnt
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
 
-				let textures = [];
+				let texCount = 0;
 				for (let name in uniforms) {
 					let [type, value] = uniforms[name];
 
 					if (typeof (value) == "function") value = value();
 					if (type == "sampler2D") {
+						console.log(`I am a texture `,{type,name,value})
 						let texture = createTexture(gl, value);
 						type = "int";
-						value = textures.push(texture) - 1;
+						value = texCount++;
+						gl.activeTexture(gl.TEXTURE0 + value);
+						gl.bindTexture(gl.TEXTURE_2D, texture);
 					} else if (type.includes("sampler")) {
 						delete uniforms[name];
 						continue;
@@ -219,12 +223,10 @@ A mod created by TumbleGamer, with help from SArpnt
 					if (!func) continue;
 					let location = gl.getUniformLocation(program, name);
 
+					
+					console.log(`I am uniform`,{func,type,name,value})
+
 					gl[func](location, value);
-				}
-				// bind textures
-				for (let id in textures) {
-					gl.activeTexture(gl.TEXTURE0 + id);
-					gl.bindTexture(gl.TEXTURE_2D, textures[id]);
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
