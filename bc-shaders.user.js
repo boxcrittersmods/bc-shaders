@@ -222,7 +222,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 					gl[func](location, value);
 				}
-				//Bind Textures
+				// bind Textures
 				for (let texture in textures) {
 					gl.activeTexture(gl.TEXTURE0 + texture);
 					gl.bindTexture(gl.TEXTURE_2D, textures[texture]);
@@ -254,7 +254,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						canvas = this.pass(canvas, shader.shader, shader.uniforms);
 					}
 
-					//targetContext.clearRect(0, 0, width, height);
+					targetContext.clearRect(0, 0, width, height);
 					targetContext.drawImage(canvas, targetX, targetY);
 				}
 			};
