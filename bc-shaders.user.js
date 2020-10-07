@@ -209,7 +209,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					if (type == "sampler2D") {
 						let texture = createTexture(gl, value);
 						type = "int";
-						value = textures.push(texture);
+						value = textures.push(texture) - 1;
 					}
 					if (type.includes("sampler")) {
 						uniforms[name] = undefined;
