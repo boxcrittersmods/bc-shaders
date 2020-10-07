@@ -267,7 +267,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 					this.container.bitmapCache[param] = Math[act](
 						this.container.bitmapCache[param],
-						shader.crop[i] * this.container[comp]
+						Math.round(shader.crop[i] * this.container[comp])
 					);
 				}
 
@@ -351,6 +351,10 @@ A mod created by TumbleGamer, with help from SArpnt
 				return;
 			console.error('This function needs to remove the old shader!');
 			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
+			//remove shader from shaderlist
+			//remove cropping if neccecary
+			//remove resolution if neccecary
+
 			//container.filters = [];
 			//createjs.Ticker.off(container.cacheTickOff);
 		};
