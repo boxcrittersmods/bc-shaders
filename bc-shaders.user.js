@@ -78,7 +78,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			return { data, VBO, texCoordBuffer, EBO };
 		}
 
-		function createTexture(gl, url, level = 0, internalFormat = GLSLFilter.gl.RGBA, format = GLSLFilter.gl.RGBA, type = GLSLFilter.gl.UNSIGNED_BYTE) {
+		function createTexture(gl, url, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
 			let texture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -88,7 +88,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
 			let image;
-			switch (url.constuctor.name) {
+			switch (url.constructor.name) {
 				case "String":
 					image = new Image();
 					image.crossOrigin = "Anonymous";
@@ -107,7 +107,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					image.src = url;
 					break;
 				case "HTMLCanvasElement":
-					image = canvas;
+					image = url; // url is acutally canvas
 					gl.bindTexture(gl.TEXTURE_2D, texture);
 					gl.texImage2D(
 						gl.TEXTURE_2D,
@@ -161,7 +161,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
 
-			p.pass = function (shader, uniforms = {}, aCoordName = "vPixelCoord") {
+			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vPixelCoord") {
 				if (!shader) return canvas;
 
 				let vertexShaderText = `#version 300 es
@@ -182,26 +182,26 @@ A mod created by TumbleGamer, with help from SArpnt
 
 				let mesh = createScreenQuad(gl);
 
-				gl.canvas.width = width;
-				gl.canvas.height = height;
-				gl.viewport(0, 0, width, height);
+				gl.canvas.width = canvas.width;
+				gl.canvas.height = canvas.height;
+				gl.viewport(0, 0, canvas.width, canvas.height);
 				gl.clearColor(0, 0, 0, 1);
 				gl.clear(gl.COLOR_BUFFER_BIT);
 
 
 				gl.useProgram(program);
 
-				let aPosLoc = gl.getAttribLocation(shader, "aPos");
+				let aPosLoc = gl.getAttribLocation(program, "aPos");
 				gl.bindBuffer(gl.ARRAY_BUFFER, mesh.VBO);
 				gl.enableVertexAttribArray(aPosLoc);
 				gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0, 0);
 
-				let aTexCoordLoc = gl.getAttribLocation(shader, "aTexCoord");
+				let aTexCoordLoc = gl.getAttribLocation(program, "aTexCoord");
 				gl.bindBuffer(gl.ARRAY_BUFFER, mesh.texCoordBuffer);
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
 
-				let textures;
+				let textures = [];
 				for (let name in uniforms) {
 					let [type, value] = uniforms[name];
 
@@ -224,8 +224,8 @@ A mod created by TumbleGamer, with help from SArpnt
 				}
 				//Bind Textures
 				for (let texture in textures) {
-					glActiveTexture(gl.TEXTURE0 + texture);
-					glBindTexture(gl.TEXTURE_2D, textures[texture]);
+					gl.activeTexture(gl.TEXTURE0 + texture);
+					gl.bindTexture(gl.TEXTURE_2D, textures[texture]);
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
@@ -251,15 +251,15 @@ A mod created by TumbleGamer, with help from SArpnt
 
 					for (let shader of this.shaders) {
 						shader.uniforms.uStageTex = ["sampler2D", canvas];
-						let { uniforms, textures } = this.parseUniforms(shader.uniforms);
-						canvas = this.pass(canvas, shader.shader, uniforms, textures);
+						canvas = this.pass(canvas, shader.shader, shader.uniforms);
 					}
 
-					targetContext.clearRect(0, 0, width, height);
+					//targetContext.clearRect(0, 0, width, height);
 					targetContext.drawImage(canvas, targetX, targetY);
 				}
 			};
 			p.clone = function () {
+				console.log('Cloning GLSLFilter...');
 				let filter = new GLSLFilter();
 				for (const shader of shaders)
 					filter.addShader(shader);
@@ -287,7 +287,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				clearShaderpack(name);
 
 			if (typeof shaders == 'string')
-				shaders = [{ shaders }];
+				shaders = [{ shader: shaders }];
 			else if (typeof shaders != 'object' || shaders === null)
 				throw `No shader!`;
 
@@ -301,7 +301,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				if (!s.container.GLSLFilter) {
 					s.container.GLSLFilter = new GLSLFilter();
 					s.container.filters || (s.container.filters = []);
-					s.container.filters.push(new GLSLFilter());
+					s.container.filters.push(s.container.GLSLFilter);
 				}
 				if (!s.container.bitmapCache) {
 					s.container.cache(0, 0, container.width, container.height);
