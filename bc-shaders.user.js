@@ -96,7 +96,6 @@ A mod created by TumbleGamer, with help from SArpnt
 					image.src = url;
 					break;
 				case "HTMLCanvasElement":
-					image = url; // url is acutally canvas
 					gl.bindTexture(gl.TEXTURE_2D, texture);
 					gl.texImage2D(
 						gl.TEXTURE_2D,
@@ -104,7 +103,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						gl.RGBA,
 						gl.RGBA,
 						gl.UNSIGNED_BYTE,
-						url
+						url // url is acutally canvas
 					);
 					gl.bindTexture(gl.TEXTURE_2D, null);
 					break;
