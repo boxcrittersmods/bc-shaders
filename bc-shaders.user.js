@@ -239,9 +239,10 @@ A mod created by TumbleGamer, with help from SArpnt
 				let gl = GLSLFilter.gl;
 				let texture = createTexture(gl);
 
-				switch(url.constuctor.name) {
+				let image
+				switch(url.constructor.name) {
 					case "String":
-						const image = new Image();
+						image = new Image();
 						image.crossOrigin = "Anonymous";
 						image.onload = function () {
 							gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -257,7 +258,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						image.src = url;
 						break;
 					case "HTMLCanvasElement":
-						const image = canvas;
+						image = canvas;
 						break;
 				}
 				
