@@ -76,10 +76,9 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			let image;
 			switch (url.constructor.name) {
 				case "String":
-					image = new Image();
+					let image = new Image();
 					image.crossOrigin = "Anonymous";
 					image.onload = function () {
 						gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -249,13 +248,16 @@ A mod created by TumbleGamer, with help from SArpnt
 				if (this.shaders.length) {
 					let canvas = context.canvas;
 
-					for (let shader of this.shaders) {
-						shader.uniforms.uStageTex = ["sampler2D", canvas];
-						canvas = this.pass(canvas, shader.shader, shader.uniforms);
+					if (context !== targetContext) {
+						targetContext.clearRect(0, 0, width, height);
+						targetContext.drawImage(canvas, targetX, targetY);
 					}
-
-					targetContext.clearRect(0, 0, width, height);
-					targetContext.drawImage(canvas, targetX, targetY);
+					for (let shader of this.shaders) {
+						shader.uniforms.uStageTex = ["sampler2D", targetContext.canvas];
+						canvas = this.pass(targetContext.canvas, shader.shader, shader.uniforms);
+						targetContext.clearRect(0, 0, width, height);
+						targetContext.drawImage(canvas, targetX, targetY);
+					}
 				}
 			};
 			p.clone = function () {
