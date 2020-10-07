@@ -24,17 +24,6 @@ A mod created by TumbleGamer, with help from SArpnt
 		function isPowerOf2(value) {
 			return (value & (value - 1)) == 0;
 		}
-		function createContext(width, height) {
-			let canvas = document.createElement("canvas");
-			canvas.width = width;
-			canvas.height = height;
-			//document.body.appendChild(canvas)
-
-			let gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-			gl.clearColor(0, 0, 0, 1);
-			gl.clear(gl.COLOR_BUFFER_BIT);
-			return gl;
-		}
 
 		function createShader(gl, type, source) {
 			let shader = gl.createShader(type);
@@ -157,9 +146,22 @@ A mod created by TumbleGamer, with help from SArpnt
 
 				this.shaders = [];
 				this.usesContext = true;
+
+				let canvas = document.createElement("canvas");
+				this.gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+				this.gl.clearColor(0, 0, 0, 1);
+				this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 			}
 
 			let p = createjs.extend(GLSLFilter, createjs.Filter);
+
+			p.setupContext = function (width, height) {
+				this.gl.canvas.width = width;
+				this.gl.canvas.height = height;
+				this.gl.clearColor(0, 0, 0, 1);
+				this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+				return this.gl;
+			};
 
 			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vPixelCoord") {
 				if (!shader) return canvas;
@@ -174,7 +176,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					gl_Position = aPos;
 				}`;
 
-				let gl = createContext(canvas.width, canvas.height);
+				let gl = this.setupContext(canvas.width, canvas.height);
 				let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderText);
 				let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, shader);
 				let program = createProgram(gl, vertexShader, fragmentShader);
@@ -210,9 +212,8 @@ A mod created by TumbleGamer, with help from SArpnt
 						let texture = createTexture(gl, value);
 						type = "int";
 						value = textures.push(texture) - 1;
-					}
-					if (type.includes("sampler")) {
-						uniforms[name] = undefined;
+					} else if (type.includes("sampler")) {
+						delete uniforms[name];
 						continue;
 					}
 
@@ -222,10 +223,10 @@ A mod created by TumbleGamer, with help from SArpnt
 
 					gl[func](location, value);
 				}
-				// bind Textures
-				for (let texture in textures) {
-					gl.activeTexture(gl.TEXTURE0 + texture);
-					gl.bindTexture(gl.TEXTURE_2D, textures[texture]);
+				// bind textures
+				for (let id in textures) {
+					gl.activeTexture(gl.TEXTURE0 + id);
+					gl.bindTexture(gl.TEXTURE_2D, textures[id]);
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
