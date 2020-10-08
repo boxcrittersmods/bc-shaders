@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.0.6.64
+// @version      0.1.0.65
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -276,7 +276,7 @@ A mod created by TumbleGamer, with help from SArpnt
 		})();
 
 		let loadedShaderpacks = [];
-		unsafeWindow.loadShaderpack = function ({
+		var loadShaderpack = function ({
 			name,
 			shader,
 			shaders = shader,
@@ -318,7 +318,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			loadedShaderpacks.push(name);
 		};
-		unsafeWindow.clearShaderpack = function (name) {
+		var clearShaderpack = function (name) {
 			if (!loadedShaderpacks.contains(name))
 				return;
 			console.error('This function needs to remove the old shader!');
@@ -326,7 +326,16 @@ A mod created by TumbleGamer, with help from SArpnt
 			//container.filters = [];
 			//createjs.Ticker.off(container.cacheTickOff);
 		};
-
-		unsafeWindow.GLSLFilter = GLSLFilter;
+		exportFunction(GLSLFilter,unsafeWindow,{
+			defineAs: "GLSLFilter"
+		  });
+		  
+		exportFunction(loadShaderpack,unsafeWindow,{
+			defineAs: "loadShaderpack"
+		  });
+		  
+		exportFunction(clearShaderpack,unsafeWindow,{
+			defineAs: "clearShaderpack"
+		  });
 	}, false);
 })();
