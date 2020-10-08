@@ -339,7 +339,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			for (let s of shaders) {
 				s = {
-					vertex:s.vertex,
+					vertex:s.vertex||vertex,
 					shader: s.shader,
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
