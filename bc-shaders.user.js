@@ -15,10 +15,9 @@
 (function () {
 	'use strict';
 	console.info(
-		`-----------------------------------
-[BOX CRITTERS SHADER LOADER]
-A mod created by TumbleGamer, with help from SArpnt
------------------------------------`
+`--------------------------------------------------------------------------------
+[BOX CRITTERS SHADER LOADER] A mod created by TumbleGamer, with help from SArpnt
+---------------------------------------------------------------------------------`
 	);
 	unsafeWindow.addEventListener('load', function () {
 		function isPowerOf2(value) {
