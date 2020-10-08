@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.1.0.66
+// @version      0.1.0.67
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -240,7 +240,13 @@ A mod created by TumbleGamer, with help from SArpnt
 
 					console.log(`I am uniform`, { func, type, name, value });
 
-					gl[func](location, value);
+					if(func.includes("Matrix")){
+						gl[func](location, false, value);
+
+					} else {
+						gl[func](location, value);
+
+					}
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
