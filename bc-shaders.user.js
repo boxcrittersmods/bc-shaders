@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.1.0.68
+// @version      0.1.0.69
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @match        https://boxcritters.com/play/
@@ -32,7 +32,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
 			if (success) return shader;
 
-			console.log(gl.getShaderInfoLog(shader));
+			console.debug(gl.getShaderInfoLog(shader));
 			gl.deleteShader(shader);
 		}
 
@@ -43,7 +43,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.linkProgram(program);
 			let success = gl.getProgramParameter(program, gl.LINK_STATUS);
 			if (success) return program;
-			console.log(gl.getProgramInfoLog(program));
+			console.debug(gl.getProgramInfoLog(program));
 			gl.deleteProgram(program);
 		}
 
@@ -140,7 +140,7 @@ A mod created by TumbleGamer, with help from SArpnt
 		let GLSLFilter = (() => {
 
 			function GLSLFilter(container) {
-				console.log("GLSLFilter created");
+				console.debug("GLSLFilter created");
 
 				this.container = container;
 				container.GLSLFilter = this;
@@ -175,7 +175,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			};
 
 			p.pass = function (canvas, vertex, shader, uniforms = {}, aCoordName = "vStageCoord") {
-				console.log("PASS");
+				console.debug("PASS");
 				if (!shader) return canvas;
 
 				let vertexShaderText = vertex || `#version 300 es
@@ -223,7 +223,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						value = value();
 
 					if (type == "sampler2D") {
-						console.log(`I am a texture `, { type, name, value });
+						console.debug(`I am a texture `, { type, name, value });
 						let texture = createTexture(gl, value);
 						type = "int";
 						value = texCount++; // texcount increases AFTER value is set, so value is set to texture id
@@ -238,7 +238,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					if (!func) continue;
 					let location = gl.getUniformLocation(program, name);
 
-					console.log(`I am uniform`, { func, type, name, value });
+					console.debug(`I am uniform`, { func, type, name, value });
 
 					if(func.includes("Matrix")){
 						gl[func](location, false, value);
@@ -302,7 +302,7 @@ A mod created by TumbleGamer, with help from SArpnt
 				}
 			};
 			p.clone = function () {
-				console.log('Cloning GLSLFilter...');
+				console.debug('Cloning GLSLFilter...');
 				let filter = new GLSLFilter();
 				for (const shader of shaders)
 					filter.addShader(shader);
