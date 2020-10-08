@@ -67,7 +67,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			return { data, VBO, texCoordBuffer, EBO };
 		}
 
-		function createTexture(gl, url, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
+		function createTexture(gl, src, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
 			let texture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -76,7 +76,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 
-			switch (url.constructor.name) {
+			switch (src.constructor.name) {
 				case "String":
 					let image = new Image();
 					image.crossOrigin = "Anonymous";
@@ -92,7 +92,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						}
 						gl.bindTexture(gl.TEXTURE_2D, null);
 					};
-					image.src = url;
+					image.src = src;
 					break;
 				case "HTMLCanvasElement":
 					gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -102,7 +102,7 @@ A mod created by TumbleGamer, with help from SArpnt
 						gl.RGBA,
 						gl.RGBA,
 						gl.UNSIGNED_BYTE,
-						url // url is acutally canvas
+						src
 					);
 					gl.bindTexture(gl.TEXTURE_2D, null);
 					break;
@@ -139,8 +139,21 @@ A mod created by TumbleGamer, with help from SArpnt
 
 		let GLSLFilter = (() => {
 
-			function GLSLFilter() {
+			function GLSLFilter(container) {
 				console.log("GLSLFilter created");
+
+				this.container = container;
+				container.GLSLFilter = this;
+
+				container.filters || (container.filters = []);
+				container.filters.push(this);
+
+				if (!container.bitmapCache) {
+					container.cache(0, 0, container.width, container.height);
+					container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
+						container.updateCache();
+					});
+				}
 
 				this.shaders = [];
 				this.usesContext = true;
@@ -162,7 +175,7 @@ A mod created by TumbleGamer, with help from SArpnt
 			};
 
 			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vStageCoord") {
-				console.log("PASS")
+				console.log("PASS");
 				if (!shader) return canvas;
 
 				let vertexShaderText = `#version 300 es
@@ -206,12 +219,14 @@ A mod created by TumbleGamer, with help from SArpnt
 				for (let name in uniforms) {
 					let [type, value] = uniforms[name];
 
-					if (typeof (value) == "function") value = value();
+					if (typeof value == "function")
+						value = value();
+
 					if (type == "sampler2D") {
-						console.log(`I am a texture `,{type,name,value})
+						console.log(`I am a texture `, { type, name, value });
 						let texture = createTexture(gl, value);
 						type = "int";
-						value = texCount++;
+						value = texCount++; // texcount increases AFTER value is set, so value is set to texture id
 						gl.activeTexture(gl.TEXTURE0 + value);
 						gl.bindTexture(gl.TEXTURE_2D, texture);
 					} else if (type.includes("sampler")) {
@@ -223,8 +238,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					if (!func) continue;
 					let location = gl.getUniformLocation(program, name);
 
-					
-					console.log(`I am uniform`,{func,type,name,value})
+					console.log(`I am uniform`, { func, type, name, value });
 
 					gl[func](location, value);
 				}
@@ -238,6 +252,25 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			p.getBounds = () => new createjs.Rectangle(0, 0, 0, 0);
 			p.addShader = function (shader) {
+				let hr = typeof this.container.bitmapCache.hScale != 'undefined',
+					st = hr ? 'hScale' : 'scale';
+				if (this.container.bitmapCache[st] < shader.resolution) {
+					this.container.bitmapCache[st] = shader.resolution;
+					if (hr)
+						unsafeWindow.world.stage.hUpdate();
+				}
+
+				for (let i in shader.crop) {
+					let param = ['x', 'y', 'width', 'height'][i],
+						comp = ['width', 'height', 'width', 'height'][i],
+						act = ['max', 'max', 'min', 'min'][i];
+
+					this.container.bitmapCache[param] = Math[act](
+						this.container.bitmapCache[param],
+						Math.round(shader.crop[i] * this.container[comp])
+					);
+				}
+
 				return this.shaders.push(shader);
 			};
 			p.applyFilter = function (
@@ -282,6 +315,8 @@ A mod created by TumbleGamer, with help from SArpnt
 			shaders = shader,
 			container = world.stage,
 			uniforms = {},
+			resolution = 1,
+			crop = [0, 0, 1, 1],
 			init,
 			tick,
 		} = {}) {
@@ -300,29 +335,26 @@ A mod created by TumbleGamer, with help from SArpnt
 					shader: s.shader,
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
+					resolution: s.resolution || resolution,
+					crop: s.crop || crop,
 				};
 
-				if (!s.container.GLSLFilter) {
-					s.container.GLSLFilter = new GLSLFilter();
-					s.container.filters || (s.container.filters = []);
-					s.container.filters.push(s.container.GLSLFilter);
-				}
-				if (!s.container.bitmapCache) {
-					s.container.cache(0, 0, container.width, container.height);
-					s.container.cacheTickOff = createjs.Ticker.on("tick", function (t) {
-						s.container.updateCache();
-					});
-				}
+				if (!s.container.GLSLFilter)
+					new GLSLFilter(s.container);
 				s.container.GLSLFilter.addShader(s);
 			}
 
 			loadedShaderpacks.push(name);
 		};
 		var clearShaderpack = function (name) {
-			if (!loadedShaderpacks.contains(name))
+			if (!loadedShaderpacks.includes(name))
 				return;
 			console.error('This function needs to remove the old shader!');
 			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
+			//remove shader from shaderlist
+			//remove cropping if neccecary
+			//remove resolution if neccecary
+
 			//container.filters = [];
 			//createjs.Ticker.off(container.cacheTickOff);
 		};
