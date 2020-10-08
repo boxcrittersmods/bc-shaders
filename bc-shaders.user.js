@@ -174,11 +174,11 @@ A mod created by TumbleGamer, with help from SArpnt
 				return this.gl;
 			};
 
-			p.pass = function (canvas, shader, uniforms = {}, aCoordName = "vStageCoord") {
+			p.pass = function (canvas, vertex, shader, uniforms = {}, aCoordName = "vStageCoord") {
 				console.log("PASS");
 				if (!shader) return canvas;
 
-				let vertexShaderText = `#version 300 es
+				let vertexShaderText = vertex || `#version 300 es
 				in vec4 aPos;
 				in vec2 aTexCoord;
 				out vec2 ${aCoordName};
@@ -289,7 +289,7 @@ A mod created by TumbleGamer, with help from SArpnt
 					}
 					for (let shader of this.shaders) {
 						shader.uniforms.uStageTex = ["sampler2D", targetContext.canvas];
-						canvas = this.pass(targetContext.canvas, shader.shader, shader.uniforms);
+						canvas = this.pass(targetContext.canvas,shader.vertex, shader.shader, shader.uniforms);
 						targetContext.clearRect(0, 0, width, height);
 						targetContext.drawImage(canvas, targetX, targetY);
 					}
@@ -311,6 +311,7 @@ A mod created by TumbleGamer, with help from SArpnt
 		let loadedShaderpacks = [];
 		var loadShaderpack = function ({
 			name,
+			vertex,
 			shader,
 			shaders = shader,
 			container = world.stage,
@@ -332,6 +333,7 @@ A mod created by TumbleGamer, with help from SArpnt
 
 			for (let s of shaders) {
 				s = {
+					vertex:s.vertex,
 					shader: s.shader,
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
