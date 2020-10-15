@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.1.1.70
+// @version      0.1.2.71
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @require      https://github.com/tumble1999/mod-utils/raw/master/mod-utils.js
@@ -136,7 +136,7 @@
 				}
 		}
 
-		let GLSLFilter = (() => {
+		let GLSLFilter = ((mod) => {
 
 			function GLSLFilter(container) {
 				mod.log("GLSLFilter created");
@@ -311,7 +311,7 @@
 			};
 
 			return createjs.promote(GLSLFilter, "Filter");
-		})();
+		})(mod);
 
 		let loadedShaderpacks = [];
 		var loadShaderpack = function ({
