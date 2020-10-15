@@ -224,7 +224,7 @@
 						value = value();
 
 					if (type == "sampler2D") {
-						mod.log(`I am a texture `, { type, name, value });
+						//mod.log(`I am a texture `, { type, name, value });
 						let texture = createTexture(gl, value);
 						type = "int";
 						value = texCount++; // texcount increases AFTER value is set, so value is set to texture id
@@ -239,7 +239,7 @@
 					if (!func) continue;
 					let location = gl.getUniformLocation(program, name);
 
-					mod.log(`I am uniform`, { func, type, name, value });
+					//mod.log(`I am uniform`, { func, type, name, value });
 
 					if(func.includes("Matrix")){
 						gl[func](location, false, value);
