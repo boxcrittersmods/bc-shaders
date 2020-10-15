@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.1.2.71
+// @version      0.1.3.72
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @require      https://github.com/tumble1999/mod-utils/raw/master/mod-utils.js
@@ -11,15 +11,17 @@
 // @match        https://boxcritters.com/play/index.html
 // @match        https://boxcritters.com/play/index.html?*
 // @match        https://boxcritters.com/play/index.html#*
+// @run-at       document-start
+// @grant        none
 // ==/UserScript==
 
 (function () {
 	'use strict';
-	var mod = BCModUtils.InitialiseMod({
+	const mod = BCModUtils.InitialiseMod({
 		name:"Box Critters Shader Loader",
 		author:"TumbleGamer, with help from SArpnt"
 	})
-	unsafeWindow.addEventListener('load', function () {
+	BCModUtils.onDocumentLoaded().then(() => {
 		function isPowerOf2(value) {
 			return (value & (value - 1)) == 0;
 		}
@@ -262,7 +264,7 @@
 				if (this.container.bitmapCache[st] < shader.resolution) {
 					this.container.bitmapCache[st] = shader.resolution;
 					if (hr)
-						unsafeWindow.world.stage.hUpdate();
+						window.world.stage.hUpdate();
 				}
 
 				for (let i in shader.crop) {
@@ -323,6 +325,7 @@
 			uniforms = {},
 			resolution = 1,
 			crop = [0, 0, 1, 1],
+			debug=false,
 			init,
 			tick,
 		} = {}) {
@@ -344,6 +347,7 @@
 					uniforms: s.uniforms || uniforms,
 					resolution: s.resolution || resolution,
 					crop: s.crop || crop,
+					debug:s.debug||debug
 				};
 
 				if (!s.container.GLSLFilter)
@@ -365,16 +369,22 @@
 			//container.filters = [];
 			//createjs.Ticker.off(container.cacheTickOff);
 		};
-		exportFunction(GLSLFilter,unsafeWindow,{
+
+		window.GLSLFilter = GLSLFilter;
+		window.loadShaderpack = loadShaderpack;
+		window.clearShaderpack = clearShaderpack;
+		if(typeof(exportFunction) !== "undefined"){
+		exportFunction(GLSLFilter,window,{
 			defineAs: "GLSLFilter"
 		  });
 		  
-		exportFunction(loadShaderpack,unsafeWindow,{
+		exportFunction(loadShaderpack,window,{
 			defineAs: "loadShaderpack"
 		  });
 		  
-		exportFunction(clearShaderpack,unsafeWindow,{
+		exportFunction(clearShaderpack,window,{
 			defineAs: "clearShaderpack"
 		  });
+		}
 	}, false);
 })();
