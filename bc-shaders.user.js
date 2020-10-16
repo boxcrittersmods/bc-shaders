@@ -17,11 +17,11 @@
 
 (function () {
 	'use strict';
-	const mod = BCModUtils.InitialiseMod({
+	const mod = new TumbleMod({
 		name:"Box Critters Shader Loader",
 		author:"TumbleGamer, with help from SArpnt"
 	})
-	BCModUtils.onDocumentLoaded().then(() => {
+	TumbleMod.onDocumentLoaded().then(() => {
 		function isPowerOf2(value) {
 			return (value & (value - 1)) == 0;
 		}
