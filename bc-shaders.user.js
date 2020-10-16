@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BoxCritters Shaders
 // @namespace    https://boxcrittersmods.ga/
-// @version      0.1.4.73
+// @version      0.1.5.74
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @require      https://github.com/tumble1999/mod-utils/raw/master/mod-utils.js
