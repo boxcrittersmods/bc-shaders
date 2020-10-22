@@ -21,123 +21,123 @@
 		id: "bcShaders",
 		abriv: "BCS",
 	});
-	TumbleMod.onDocumentLoaded().then(_ => {
-		function isPowerOf2(value) {
-			return (value & (value - 1)) == 0;
-		}
 
-		function createShader(gl, type, source) {
-			let shader = gl.createShader(type);
-			gl.shaderSource(shader, source);
-			gl.compileShader(shader);
-			let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-			if (success) return shader;
+	function isPowerOf2(value) {
+		return (value & (value - 1)) == 0;
+	}
 
-			mod.log(gl.getShaderInfoLog(shader));
-			gl.deleteShader(shader);
-		}
+	function createShader(gl, type, source) {
+		let shader = gl.createShader(type);
+		gl.shaderSource(shader, source);
+		gl.compileShader(shader);
+		let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+		if (success) return shader;
 
-		function createProgram(gl, vertexShader, fragmentShader) {
-			let program = gl.createProgram();
-			gl.attachShader(program, vertexShader);
-			gl.attachShader(program, fragmentShader);
-			gl.linkProgram(program);
-			let success = gl.getProgramParameter(program, gl.LINK_STATUS);
-			if (success) return program;
-			mod.log(gl.getProgramInfoLog(program));
-			gl.deleteProgram(program);
-		}
+		mod.log(gl.getShaderInfoLog(shader));
+		gl.deleteShader(shader);
+	}
 
-		function createMesh(gl, data) {
-			//let VAO = gl.createVertexArray()
-			let VBO = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.vertices), gl.STATIC_DRAW);
+	function createProgram(gl, vertexShader, fragmentShader) {
+		let program = gl.createProgram();
+		gl.attachShader(program, vertexShader);
+		gl.attachShader(program, fragmentShader);
+		gl.linkProgram(program);
+		let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+		if (success) return program;
+		mod.log(gl.getProgramInfoLog(program));
+		gl.deleteProgram(program);
+	}
 
-			let texCoordBuffer = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.texCoords), gl.STATIC_DRAW);
+	function createMesh(gl, data) {
+		//let VAO = gl.createVertexArray()
+		let VBO = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.vertices), gl.STATIC_DRAW);
 
-			let EBO = gl.createBuffer();
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, EBO);
-			gl.bufferData(
-				gl.ELEMENT_ARRAY_BUFFER,
-				new Uint16Array(data.indices),
-				gl.STATIC_DRAW
-			);
-			return { data, VBO, texCoordBuffer, EBO };
-		}
+		let texCoordBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data.texCoords), gl.STATIC_DRAW);
 
-		function createTexture(gl, src, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
-			let texture = gl.createTexture();
-			gl.bindTexture(gl.TEXTURE_2D, texture);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			gl.bindTexture(gl.TEXTURE_2D, null);
+		let EBO = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, EBO);
+		gl.bufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			new Uint16Array(data.indices),
+			gl.STATIC_DRAW
+		);
+		return { data, VBO, texCoordBuffer, EBO };
+	}
 
-			switch (src.constructor.name) {
-				case "String":
-					let image = new Image();
-					image.crossOrigin = "Anonymous";
-					image.onload = function () {
-						gl.bindTexture(gl.TEXTURE_2D, texture);
-						gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
-						if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-							gl.generateMipmap(gl.TEXTURE_2D);
-						} else {
-							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-							gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-						}
-						gl.bindTexture(gl.TEXTURE_2D, null);
-					};
-					image.src = src;
-					break;
-				case "HTMLCanvasElement":
+	function createTexture(gl, src, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
+		let texture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+
+		switch (src.constructor.name) {
+			case "String":
+				let image = new Image();
+				image.crossOrigin = "Anonymous";
+				image.onload = function () {
 					gl.bindTexture(gl.TEXTURE_2D, texture);
-					gl.texImage2D(
-						gl.TEXTURE_2D,
-						0,
-						gl.RGBA,
-						gl.RGBA,
-						gl.UNSIGNED_BYTE,
-						src
-					);
+					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
+					if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+						gl.generateMipmap(gl.TEXTURE_2D);
+					} else {
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+					}
 					gl.bindTexture(gl.TEXTURE_2D, null);
-					break;
+				};
+				image.src = src;
+				break;
+			case "HTMLCanvasElement":
+				gl.bindTexture(gl.TEXTURE_2D, texture);
+				gl.texImage2D(
+					gl.TEXTURE_2D,
+					0,
+					gl.RGBA,
+					gl.RGBA,
+					gl.UNSIGNED_BYTE,
+					src
+				);
+				gl.bindTexture(gl.TEXTURE_2D, null);
+				break;
+		}
+
+		return texture;
+	};
+
+	function createScreenQuad(gl) {
+		let vertices = [-1, 1, -1, -1, 1, -1, 1, 1];
+		let texCoords = [0, 1, 0, 0, 1, 0, 1, 1];
+		let indices = [0, 1, 2, 0, 2, 3];
+		return createMesh(gl, { vertices, texCoords, indices });
+	}
+
+	function uniformFunc(type) {
+		if ("234".includes(type.slice(-1))) {
+			let n = type.slice(-1);
+			switch (type.slice(0, -1)) {
+				case 'vec':
+					return `uniform${n}fv`;
+				case 'mat':
+					return `uniformMatrix${n}fv`;
 			}
-
-			return texture;
-		};
-
-		function createScreenQuad(gl) {
-			let vertices = [-1, 1, -1, -1, 1, -1, 1, 1];
-			let texCoords = [0, 1, 0, 0, 1, 0, 1, 1];
-			let indices = [0, 1, 2, 0, 2, 3];
-			return createMesh(gl, { vertices, texCoords, indices });
-		}
-
-		function uniformFunc(type) {
-			if ("234".includes(type.slice(-1))) {
-				let n = type.slice(-1);
-				switch (type.slice(0, -1)) {
-					case 'vec':
-						return `uniform${n}fv`;
-					case 'mat':
-						return `uniformMatrix${n}fv`;
-				}
-			} else
-				switch (type) {
-					case 'float':
-						return `uniform1f`;
-					case 'int':
-					case 'signed int':
-						return `uniform1i`;
-				}
-		}
-
+		} else
+			switch (type) {
+				case 'float':
+					return `uniform1f`;
+				case 'int':
+				case 'signed int':
+					return `uniform1i`;
+			}
+	}
+	TumbleMod.onDocumentLoaded().then(_ => {
 		let GLSLFilter = (_ => {
 			function GLSLFilter(container) {
 				mod.log("GLSLFilter created");
