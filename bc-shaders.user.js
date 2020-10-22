@@ -277,6 +277,12 @@
 					);
 				}
 
+				shader.uniforms = Object.assign({
+					uStageTex: ["sampler2D", c => c],
+					uTime: ["float", _ => performance.now()],
+					uViewportSize: ["vec2", c => [c.width, c.height]],
+				}, shader.uniforms);
+
 				return this.shaders.push(shader);
 			};
 			p.applyFilter = function (
@@ -294,7 +300,6 @@
 						targetContext.drawImage(canvas, targetX, targetY);
 					}
 					for (let shader of this.shaders) {
-						shader.uniforms.uStageTex = ["sampler2D", targetContext.canvas];
 						canvas = this.pass(targetContext.canvas, shader.vertex, shader.shader, shader.uniforms);
 						targetContext.clearRect(0, 0, width, height);
 						targetContext.drawImage(canvas, targetX, targetY);
