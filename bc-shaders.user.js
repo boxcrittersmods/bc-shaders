@@ -18,10 +18,10 @@
 (function () {
 	'use strict';
 	const mod = new TumbleMod({
-		name:"Box Critters Shader Loader",
-		author:"TumbleGamer, with help from SArpnt"
-	})
-	TumbleMod.onDocumentLoaded().then(() => {
+		id: "bcShaders",
+		abriv: "BCS",
+	});
+	TumbleMod.onDocumentLoaded().then(_ => {
 		function isPowerOf2(value) {
 			return (value & (value - 1)) == 0;
 		}
@@ -138,8 +138,7 @@
 				}
 		}
 
-		let GLSLFilter = ((mod) => {
-
+		let GLSLFilter = (_ => {
 			function GLSLFilter(container) {
 				mod.log("GLSLFilter created");
 
@@ -221,7 +220,7 @@
 					let [type, value] = uniforms[name];
 
 					if (typeof value == "function")
-						value = value();
+						value = value(canvas);
 
 					if (type == "sampler2D") {
 						//mod.log(`I am a texture `, { type, name, value });
@@ -241,7 +240,7 @@
 
 					//mod.log(`I am uniform`, { func, type, name, value });
 
-					if(func.includes("Matrix")){
+					if (func.includes("Matrix")) {
 						gl[func](location, false, value);
 
 					} else {
@@ -296,7 +295,7 @@
 					}
 					for (let shader of this.shaders) {
 						shader.uniforms.uStageTex = ["sampler2D", targetContext.canvas];
-						canvas = this.pass(targetContext.canvas,shader.vertex, shader.shader, shader.uniforms);
+						canvas = this.pass(targetContext.canvas, shader.vertex, shader.shader, shader.uniforms);
 						targetContext.clearRect(0, 0, width, height);
 						targetContext.drawImage(canvas, targetX, targetY);
 					}
@@ -313,7 +312,7 @@
 			};
 
 			return createjs.promote(GLSLFilter, "Filter");
-		})(mod);
+		})();
 
 		let loadedShaderpacks = [];
 		var loadShaderpack = function ({
@@ -325,7 +324,7 @@
 			uniforms = {},
 			resolution = 1,
 			crop = [0, 0, 1, 1],
-			debug=false,
+			debug = false,
 			init,
 			tick,
 		} = {}) {
@@ -341,13 +340,13 @@
 
 			for (let s of shaders) {
 				s = {
-					vertex:s.vertex||vertex,
+					vertex: s.vertex || vertex,
 					shader: s.shader,
 					container: s.container || container,
 					uniforms: s.uniforms || uniforms,
 					resolution: s.resolution || resolution,
 					crop: s.crop || crop,
-					debug:s.debug||debug
+					debug: s.debug || debug
 				};
 
 				if (!s.container.GLSLFilter)
@@ -373,18 +372,5 @@
 		window.GLSLFilter = GLSLFilter;
 		window.loadShaderpack = loadShaderpack;
 		window.clearShaderpack = clearShaderpack;
-		if(typeof(exportFunction) !== "undefined"){
-		exportFunction(GLSLFilter,window,{
-			defineAs: "GLSLFilter"
-		  });
-		  
-		exportFunction(loadShaderpack,window,{
-			defineAs: "loadShaderpack"
-		  });
-		  
-		exportFunction(clearShaderpack,window,{
-			defineAs: "clearShaderpack"
-		  });
-		}
 	}, false);
 })();
