@@ -80,7 +80,8 @@
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.bindTexture(gl.TEXTURE_2D, null);
 
-		modifyTexture(texture, gl, src, level, internalFormat, format, type);
+		if (src)
+			modifyTexture(texture, gl, src, level, internalFormat, format, type);
 
 		return texture;
 	};
@@ -122,6 +123,8 @@
 				);
 				gl.bindTexture(gl.TEXTURE_2D, null);
 				break;
+			default:
+				throw `'${src.constructor.name}' not a valid image type`;
 		}
 	}
 
@@ -221,10 +224,14 @@
 						value = value(canvas);
 
 					if (data[0] == "sampler2D") {
-						mod.log(`uTexture:`, name, value, data[1]);
-						let texture = modifyTexture(value, this.gl, data[1]);
-						gl.activeTexture(gl.TEXTURE0 + value);
-						gl.bindTexture(gl.TEXTURE_2D, texture);
+						/**
+						 * data[1]: textureId
+						 * data[2]: WebGLTexture
+						 */
+						//mod.log(`uTexture:`, name, value, data);
+						modifyTexture(data[2], this.gl, value);
+						gl.activeTexture(gl.TEXTURE0 + data[1]);
+						gl.bindTexture(gl.TEXTURE_2D, data[2]);
 					} else
 						gl[type](...args, value); // this doesn't acutally need to constantly be repeated unless value is a function, this should be moved
 
@@ -287,15 +294,18 @@
 				for (let name in shader.uniforms) {
 					let [type, value] = shader.uniforms[name];
 
+					let calcvalue;
+					if (typeof value != 'function')
+						calcvalue = value;
+
 					let data = [];
 					if (type == "sampler2D") {
 						mod.log(`init uTexture:`, { type, name, value });
-						let texture = createTexture(this.gl, value);
-						data.push("sampler2D", value);
-						type = "int";
-						value = texCount++; // texcount increases AFTER value is set, so value is set to texture id
-						this.gl.activeTexture(this.gl.TEXTURE0 + value);
+						let texture = createTexture(this.gl, calcvalue);
+						data = ["sampler2D", texCount++, texture]; // texcount increases AFTER pushed is set, so data[1] is set to texture id
+						this.gl.activeTexture(this.gl.TEXTURE0 + data[1]);
 						this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+						type = "int";
 					} else if (type.includes("sampler")) {
 						delete shader.uniforms[name];
 						continue;
