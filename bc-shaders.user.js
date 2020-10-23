@@ -326,7 +326,7 @@
 					else
 						args = [location];
 
-					shader.uniforms[name] = [func, args, value, data];
+					shader.uniforms[name] = [func, args, value, data]; // func, args, and value are unneccecary when doing a texture, they should be removed
 				}
 
 				return this.shaders.push(shader);
