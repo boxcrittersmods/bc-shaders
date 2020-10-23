@@ -129,10 +129,11 @@
 	}
 
 	function createScreenQuad(gl) {
-		let vertices = [-1, 1, -1, -1, 1, -1, 1, 1];
-		let texCoords = [0, 1, 0, 0, 1, 0, 1, 1];
-		let indices = [0, 1, 2, 0, 2, 3];
-		return createMesh(gl, { vertices, texCoords, indices });
+		return createMesh(gl, {
+			vertices: [-1, 1, -1, -1, 1, -1, 1, 1],
+			texCoords: [0, 1, 0, 0, 1, 0, 1, 1],
+			indices: [0, 1, 2, 0, 2, 3],
+		});
 	}
 
 	function uniformFunc(type) {
@@ -185,6 +186,7 @@
 			p.setupContext = function (width, height) {
 				this.gl.canvas.width = width;
 				this.gl.canvas.height = height;
+				this.gl.viewport(0, 0, width, height);
 				this.gl.clearColor(0, 0, 0, 1);
 				this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 				return this.gl;
@@ -194,15 +196,7 @@
 				if (!program) return canvas;
 
 				let gl = this.setupContext(canvas.width, canvas.height);
-
 				let mesh = createScreenQuad(gl);
-
-				gl.canvas.width = canvas.width;
-				gl.canvas.height = canvas.height;
-				gl.viewport(0, 0, canvas.width, canvas.height);
-				gl.clearColor(0, 0, 0, 1);
-				gl.clear(gl.COLOR_BUFFER_BIT);
-
 
 				gl.useProgram(program);
 
@@ -239,7 +233,6 @@
 				}
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 				gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
-
 				return gl.canvas;
 			};
 
