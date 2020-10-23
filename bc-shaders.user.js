@@ -300,7 +300,7 @@
 
 					let data = [];
 					if (type == "sampler2D") {
-						mod.log(`init uTexture:`, { type, name, value });
+						//mod.log(`init uTexture:`, { type, name, value });
 						let texture = createTexture(this.gl, calcvalue);
 						data = ["sampler2D", texCount++, texture]; // texcount increases AFTER pushed is set, so data[1] is set to texture id
 						this.gl.activeTexture(this.gl.TEXTURE0 + data[1]);
