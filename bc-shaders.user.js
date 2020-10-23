@@ -218,7 +218,7 @@
 
 				for (let name in uniforms) {
 					//console.time(name);
-					let [type, args, value, data] = uniforms[name];
+					let [func, args, value, data] = uniforms[name];
 
 					if (typeof value == "function")
 						value = value(canvas);
@@ -233,7 +233,7 @@
 						gl.activeTexture(gl.TEXTURE0 + data[1]);
 						gl.bindTexture(gl.TEXTURE_2D, data[2]);
 					} else
-						gl[type](...args, value); // this doesn't acutally need to constantly be repeated unless value is a function, this should be moved
+						gl[func](...args, value);
 
 					//console.timeEnd(name);
 				}
