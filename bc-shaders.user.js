@@ -240,13 +240,10 @@
 
 					//mod.log(`I am uniform`, { func, type, name, value });
 
-					if (func.includes("Matrix")) {
+					if (func.includes("Matrix"))
 						gl[func](location, false, value);
-
-					} else {
+					else
 						gl[func](location, value);
-
-					}
 				}
 
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
@@ -281,6 +278,7 @@
 					uStageTex: ["sampler2D", c => c],
 					uTime: ["float", _ => performance.now()],
 					uViewportSize: ["vec2", c => [c.width, c.height]],
+					uViewportScale: ["float", this.container.bitmapCache.scale],
 				}, shader.uniforms);
 
 				return this.shaders.push(shader);

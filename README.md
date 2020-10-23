@@ -22,6 +22,7 @@
 	
 			uniform sampler2D uStageTex;
 			uniform vec2 uViewportSize;
+			uniform float uViewportScale;
 			uniform float uTime;
 			uniform sampler2D uSampler2D;
 	
@@ -59,3 +60,4 @@
 * sampler2D uStageTex
 * float uTime
 * vec2 uViewportSize
+* float uViewportScale
