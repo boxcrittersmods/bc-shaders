@@ -99,9 +99,7 @@
 				function onLoad() {
 					gl.bindTexture(gl.TEXTURE_2D, texture);
 					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, src);
-					if (isPowerOf2(src.width) && isPowerOf2(src.height)) {
-						gl.generateMipmap(gl.TEXTURE_2D);
-					} else {
+					if (!isPowerOf2(src.width) || !isPowerOf2(src.height)) {
 						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -223,7 +221,7 @@
 						 * data[2]: WebGLTexture
 						 */
 						//mod.log(`uTexture:`, name, value, data);
-						modifyTexture(data[2], this.gl, value);
+						modifyTexture(data[2], this.gl, value); // preferably this would happen before useProgram
 						gl.activeTexture(gl.TEXTURE0 + data[1]);
 						gl.bindTexture(gl.TEXTURE_2D, data[2]);
 					} else
@@ -405,7 +403,7 @@
 				return;
 			console.error('This function needs to remove the old shader!');
 			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
-			//remove shader from shaderlist
+			//remove shaders from shaderlists
 			//remove cropping if neccecary
 			//remove resolution if neccecary
 
