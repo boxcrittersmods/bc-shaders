@@ -5,6 +5,9 @@
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
 // @require      https://github.com/tumble1999/mod-utils/raw/master/mod-utils.js
+// @require      https://github.com/tumble1999/modial/raw/master/modial.js
+// @require      https://github.com/SArpnt/ctrl-panel/raw/master/script.user.js
+// @require      https://github.com/tumble1999/critterguration/raw/master/critterguration.user.js
 // @match        https://boxcritters.com/play/
 // @match        https://boxcritters.com/play/?*
 // @match        https://boxcritters.com/play/#*
@@ -371,6 +374,19 @@
 			//container.filters = [];
 			//createjs.Ticker.off(container.cacheTickOff);
 		};
+
+
+
+		var bcShadersSettings = Critterguration.registerSettingsMenu(mod, () => {
+			bcShadersSettings.innerHTML = "";
+			var packList = bcShadersSettings.createListGroup("Loaded Shaders");
+			loadedShaderpacks.forEach(pack => {
+				packList.addItem(pack.name, "primary",
+					`Uniforms: ${pack.uniforms.length}
+				Shaders: ${pack.shaders.length}
+				Resostion: ${pack.resolution}`);
+			});
+		});
 
 		window.GLSLFilter = GLSLFilter;
 		window.loadShaderpack = loadShaderpack;
