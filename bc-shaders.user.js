@@ -260,9 +260,9 @@
 				// add uniforms
 				shader.uniforms = Object.assign({
 					uStageTex: ["sampler2D", c => c],
-					uTime: ["float", _ => performance.now()],
+					uTime: ["float", c => performance.now()],
 					uViewportSize: ["vec2", c => [c.width, c.height]],
-					uViewportScale: ["float", this.container.bitmapCache.scale],
+					uViewportScale: ["float", c => this.container.bitmapCache.scale],
 				}, shader.uniforms);
 
 				// create program
