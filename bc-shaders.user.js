@@ -4,6 +4,7 @@
 // @version      0.1.5.74
 // @description  Create shaders for boxcritters
 // @author       TumbleGamer, SArpnt
+// @icon      https://github.com/boxcrittersmods/bc-shaders/raw/master/icon.png
 // @require      https://github.com/tumble1999/mod-utils/raw/master/mod-utils.js
 // @require      https://github.com/tumble1999/modial/raw/master/modial.js
 // @require      https://github.com/SArpnt/ctrl-panel/raw/master/script.user.js
