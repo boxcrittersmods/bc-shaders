@@ -72,7 +72,7 @@
 		return { data, VBO, texCoordBuffer, EBO };
 	}
 
-	function createTexture(gl, src, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
+	function createTexture(gl, src, level, internalFormat, format, type) {
 		let texture = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -81,23 +81,34 @@
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 		gl.bindTexture(gl.TEXTURE_2D, null);
 
+		if (src)
+			modifyTexture(texture, gl, src, level, internalFormat, format, type);
+
+		return texture;
+	};
+
+	function modifyTexture(texture, gl, src, level = 0, internalFormat = gl.RGBA, format = gl.RGBA, type = gl.UNSIGNED_BYTE) {
 		switch (src.constructor.name) {
 			case "String":
-				let image = new Image();
-				image.crossOrigin = "Anonymous";
-				image.onload = function () {
+				{
+					let image = new Image();
+					image.crossOrigin = "Anonymous";
+					image.src = src;
+					src = image; // should be safe
+				}
+			case "HTMLImageElement":
+				function onLoad() {
 					gl.bindTexture(gl.TEXTURE_2D, texture);
-					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, image);
-					if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-						gl.generateMipmap(gl.TEXTURE_2D);
-					} else {
+					gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, format, type, src);
+					if (!isPowerOf2(src.width) || !isPowerOf2(src.height)) {
 						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 						gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 					}
 					gl.bindTexture(gl.TEXTURE_2D, null);
 				};
-				image.src = src;
+				if (src.complete) onLoad();
+				else src.addEventListener('load', onLoad);
 				break;
 			case "HTMLCanvasElement":
 				gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -111,16 +122,17 @@
 				);
 				gl.bindTexture(gl.TEXTURE_2D, null);
 				break;
+			default:
+				throw `'${src.constructor.name}' not a valid image type`;
 		}
-
-		return texture;
-	};
+	}
 
 	function createScreenQuad(gl) {
-		let vertices = [-1, 1, -1, -1, 1, -1, 1, 1];
-		let texCoords = [0, 1, 0, 0, 1, 0, 1, 1];
-		let indices = [0, 1, 2, 0, 2, 3];
-		return createMesh(gl, { vertices, texCoords, indices });
+		return createMesh(gl, {
+			vertices: [-1, 1, -1, -1, 1, -1, 1, 1],
+			texCoords: [0, 1, 0, 0, 1, 0, 1, 1],
+			indices: [0, 1, 2, 0, 2, 3],
+		});
 	}
 
 	function uniformFunc(type) {
@@ -173,39 +185,17 @@
 			p.setupContext = function (width, height) {
 				this.gl.canvas.width = width;
 				this.gl.canvas.height = height;
+				this.gl.viewport(0, 0, width, height);
 				this.gl.clearColor(0, 0, 0, 1);
 				this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 				return this.gl;
 			};
 
-			p.pass = function (canvas, vertex, shader, uniforms = {}, aCoordName = "vStageCoord") {
-				mod.log("PASS");
-				if (!shader) return canvas;
-
-				let vertexShaderText = vertex || `#version 300 es
-				in vec4 aPos;
-				in vec2 aTexCoord;
-				out vec2 ${aCoordName};
-
-				void main() {
-					${aCoordName} = vec2(aTexCoord.x, 1. - aTexCoord.y);
-					gl_Position = aPos;
-				}`;
-
-				let gl = this.setupContext(canvas.width, canvas.height);
-				let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderText);
-				let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, shader);
-				let program = createProgram(gl, vertexShader, fragmentShader);
+			p.pass = function (canvas, program, uniforms = {}) {
 				if (!program) return canvas;
 
+				let gl = this.setupContext(canvas.width, canvas.height);
 				let mesh = createScreenQuad(gl);
-
-				gl.canvas.width = canvas.width;
-				gl.canvas.height = canvas.height;
-				gl.viewport(0, 0, canvas.width, canvas.height);
-				gl.clearColor(0, 0, 0, 1);
-				gl.clear(gl.COLOR_BUFFER_BIT);
-
 
 				gl.useProgram(program);
 
@@ -219,40 +209,29 @@
 				gl.enableVertexAttribArray(aTexCoordLoc);
 				gl.vertexAttribPointer(aTexCoordLoc, 2, gl.FLOAT, false, 0, 0);
 
-				let texCount = 0;
 				for (let name in uniforms) {
-					let [type, value] = uniforms[name];
+					//console.time(name);
+					let [func, args, value, data] = uniforms[name];
 
 					if (typeof value == "function")
 						value = value(canvas);
 
-					if (type == "sampler2D") {
-						//mod.log(`I am a texture `, { type, name, value });
-						let texture = createTexture(gl, value);
-						type = "int";
-						value = texCount++; // texcount increases AFTER value is set, so value is set to texture id
-						gl.activeTexture(gl.TEXTURE0 + value);
-						gl.bindTexture(gl.TEXTURE_2D, texture);
-					} else if (type.includes("sampler")) {
-						delete uniforms[name];
-						continue;
-					}
+					if (data[0] == "sampler2D") {
+						/**
+						 * data[1]: textureId
+						 * data[2]: WebGLTexture
+						 */
+						//mod.log(`uTexture:`, name, value, data);
+						modifyTexture(data[2], this.gl, value); // preferably this would happen before useProgram
+						gl.activeTexture(gl.TEXTURE0 + data[1]);
+						gl.bindTexture(gl.TEXTURE_2D, data[2]);
+					} else
+						gl[func](...args, value);
 
-					let func = uniformFunc(type);
-					if (!func) continue;
-					let location = gl.getUniformLocation(program, name);
-
-					//mod.log(`I am uniform`, { func, type, name, value });
-
-					if (func.includes("Matrix"))
-						gl[func](location, false, value);
-					else
-						gl[func](location, value);
+					//console.timeEnd(name);
 				}
-
 				gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.EBO);
 				gl.drawElements(gl.TRIANGLES, mesh.data.indices.length, gl.UNSIGNED_SHORT, 0);
-
 				return gl.canvas;
 			};
 
@@ -267,6 +246,7 @@
 						window.world.stage.hUpdate();
 				}
 
+				// calculate shader.crop
 				for (let i in shader.crop) {
 					let param = ['x', 'y', 'width', 'height'][i],
 						comp = ['width', 'height', 'width', 'height'][i],
@@ -278,12 +258,68 @@
 					);
 				}
 
+				// add uniforms
 				shader.uniforms = Object.assign({
 					uStageTex: ["sampler2D", c => c],
-					uTime: ["float", _ => performance.now()],
+					uTime: ["float", c => performance.now()],
 					uViewportSize: ["vec2", c => [c.width, c.height]],
-					uViewportScale: ["float", this.container.bitmapCache.scale],
+					uViewportScale: ["float", c => this.container.bitmapCache.scale],
 				}, shader.uniforms);
+
+				// create program
+				shader.vertex = shader.vertex || `#version 300 es
+				in vec4 aPos;
+				in vec2 aTexCoord;
+				out vec2 vStageCoord;
+
+				void main() {
+					vStageCoord = vec2(aTexCoord.x, 1. - aTexCoord.y);
+					gl_Position = aPos;
+				}`;
+
+				let vertexShader = createShader(this.gl, this.gl.VERTEX_SHADER, shader.vertex);
+				let fragmentShader = createShader(this.gl, this.gl.FRAGMENT_SHADER, shader.shader);
+				shader.program = createProgram(this.gl, vertexShader, fragmentShader);
+
+				// parse uniforms
+				let texCount = 0;
+				for (let name in shader.uniforms) {
+					let [type, value] = shader.uniforms[name];
+
+					let calcvalue;
+					if (typeof value != 'function')
+						calcvalue = value;
+
+					let data = [];
+					if (type == "sampler2D") {
+						//mod.log(`init uTexture:`, { type, name, value });
+						let texture = createTexture(this.gl, calcvalue);
+						data = ["sampler2D", texCount++, texture]; // texcount increases AFTER pushed is set, so data[1] is set to texture id
+						this.gl.activeTexture(this.gl.TEXTURE0 + data[1]);
+						this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+						type = "int";
+					} else if (type.includes("sampler")) {
+						delete shader.uniforms[name];
+						continue;
+					}
+
+					let func = uniformFunc(type);
+					if (!func) {
+						delete shader.uniforms[name];
+						continue;
+					};
+					let location = this.gl.getUniformLocation(shader.program, name);
+
+					mod.log(`init uniform:`, { name, func, type, value, data });
+
+					let args;
+					if (func.includes("Matrix"))
+						args = [location, false];
+					else
+						args = [location];
+
+					shader.uniforms[name] = [func, args, value, data]; // func, args, and value are unneccecary when doing a texture, they should be removed
+				}
 
 				return this.shaders.push(shader);
 			};
@@ -302,7 +338,7 @@
 						targetContext.drawImage(canvas, targetX, targetY);
 					}
 					for (let shader of this.shaders) {
-						canvas = this.pass(targetContext.canvas, shader.vertex, shader.shader, shader.uniforms);
+						canvas = this.pass(targetContext.canvas, shader.program, shader.uniforms);
 						targetContext.clearRect(0, 0, width, height);
 						targetContext.drawImage(canvas, targetX, targetY);
 					}
@@ -322,7 +358,7 @@
 		})();
 
 		let loadedShaderpacks = [];
-		var loadShaderpack = function ({
+		function loadShaderpack({
 			name,
 			vertex,
 			shader,
@@ -363,12 +399,12 @@
 
 			loadedShaderpacks.push(name);
 		};
-		var clearShaderpack = function (name) {
+		function clearShaderpack(name) {
 			if (!loadedShaderpacks.includes(name))
 				return;
 			console.error('This function needs to remove the old shader!');
 			loadedShaderpacks = loadedShaderpacks.filter(e => e !== name);
-			//remove shader from shaderlist
+			//remove shaders from shaderlists
 			//remove cropping if neccecary
 			//remove resolution if neccecary
 
@@ -377,10 +413,9 @@
 		};
 
 
-
-		var bcShadersSettings = Critterguration.registerSettingsMenu(mod, () => {
+		let bcShadersSettings = Critterguration.registerSettingsMenu(mod, () => {
 			bcShadersSettings.innerHTML = "";
-			var packList = bcShadersSettings.createListGroup("Loaded Shaders");
+			let packList = bcShadersSettings.createListGroup("Loaded Shaders");
 			loadedShaderpacks.forEach(pack => {
 				packList.addItem(pack.name, "primary",
 					`Uniforms: ${pack.uniforms.length}
