@@ -9,12 +9,7 @@
 // @require      https://github.com/tumble1999/modial/raw/master/modial.js
 // @require      https://github.com/SArpnt/ctrl-panel/raw/master/script.user.js
 // @require      https://github.com/tumble1999/critterguration/raw/master/critterguration.user.js
-// @match        https://boxcritters.com/play/
-// @match        https://boxcritters.com/play/?*
-// @match        https://boxcritters.com/play/#*
-// @match        https://boxcritters.com/play/index.html
-// @match        https://boxcritters.com/play/index.html?*
-// @match        https://boxcritters.com/play/index.html#*
+// @include      /^https:\/\/boxcritters\.com\/play\/(index\.html)?([\?#].*)?$/
 // @run-at       document-start
 // @grant        none
 // ==/UserScript==
